@@ -1,0 +1,155 @@
+<main class="page">
+  <header class="page__header">
+    <h1>Tokens de diseño</h1>
+    <p>Página de desarrollo: el sistema visual de SupportHub en un solo lugar.</p>
+  </header>
+
+  <section>
+    <h2>Superficies y bordes</h2>
+    <div class="swatches">
+      @for (s of surfaces; track s.variable) {
+        <div class="swatch">
+          <span class="swatch__chip" [style.background]="'var(' + s.variable + ')'"></span>
+          <span>{{ s.name }}</span>
+          <code>{{ s.variable }}</code>
+        </div>
+      }
+    </div>
+  </section>
+
+  <section>
+    <h2>Texto</h2>
+    <div class="swatches">
+      @for (s of texts; track s.variable) {
+        <div class="swatch">
+          <span class="swatch__chip" [style.background]="'var(' + s.variable + ')'"></span>
+          <span>{{ s.name }}</span>
+          <code>{{ s.variable }}</code>
+        </div>
+      }
+    </div>
+  </section>
+
+  <section>
+    <h2>Acento</h2>
+    <div class="swatches">
+      @for (s of accents; track s.variable) {
+        <div class="swatch">
+          <span class="swatch__chip" [style.background]="'var(' + s.variable + ')'"></span>
+          <span>{{ s.name }}</span>
+          <code>{{ s.variable }}</code>
+        </div>
+      }
+    </div>
+  </section>
+
+  <section>
+    <h2>Tipografía</h2>
+    <div class="type">
+      @for (t of scale; track t.variable) {
+        <div class="type__row">
+          <code>{{ t.variable }}</code>
+          <span [style.font-size]="'var(' + t.variable + ')'">{{ t.name }}</span>
+        </div>
+      }
+      <div class="type__row">
+        <code>--font-mono</code>
+        <span class="mono">TCK-000142 · AST-000045 · 1.234,5 h</span>
+      </div>
+      <div class="type__row">
+        <code>.num</code>
+        <span class="num">0123456789 · cifras de ancho fijo para tablas</span>
+      </div>
+      <div class="type__row">
+        <code>Español</code>
+        <span>¿Cómo está la conexión? Ñandú, canción, árbol, pingüino, ¡listo!</span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Espaciado y radios</h2>
+    <div class="spaces">
+      @for (s of spaces; track s) {
+        <div class="spaces__row">
+          <code>{{ s }}</code>
+          <span class="spaces__bar" [style.width]="'var(' + s + ')'"></span>
+        </div>
+      }
+    </div>
+    <div class="swatches radii">
+      @for (r of radii; track r.variable) {
+        <div class="swatch">
+          <span class="swatch__box" [style.border-radius]="'var(' + r.variable + ')'"></span>
+          <span>{{ r.name }}</span>
+          <code>{{ r.variable }}</code>
+        </div>
+      }
+    </div>
+  </section>
+
+  <section>
+    <h2>Estados de ticket</h2>
+    <div class="chips">
+      @for (st of ticketStatuses; track st.key) {
+        <span class="chip" [class]="'chip tone-' + st.tone" [class.is-voided]="st.voided">{{
+          st.label
+        }}</span>
+      }
+    </div>
+  </section>
+
+  <section>
+    <h2>Estados de activo</h2>
+    <div class="chips">
+      @for (st of assetStatuses; track st.key) {
+        <span class="chip" [class]="'chip tone-' + st.tone" [class.is-voided]="st.voided">{{
+          st.label
+        }}</span>
+      }
+    </div>
+  </section>
+
+  <section>
+    <h2>Prioridades</h2>
+    <div class="chips">
+      @for (p of priorities; track p.key) {
+        <span class="prio">
+          <span class="prio__dot" [style.background]="'var(' + p.variable + ')'"></span>
+          {{ p.label }}
+        </span>
+      }
+    </div>
+  </section>
+
+  <section>
+    <h2>Muestra de tabla densa</h2>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Asunto</th>
+          <th>Estado</th>
+          <th class="table__right">Minutos</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (r of sampleRows; track r.code) {
+          <tr>
+            <td class="mono">{{ r.code }}</td>
+            <td>{{ r.title }}</td>
+            <td>
+              <span
+                class="chip"
+                [class]="'chip tone-' + r.status.tone"
+                [class.is-voided]="r.status.voided"
+                >{{ r.status.label }}</span
+              >
+            </td>
+            <td class="table__right num">{{ r.age }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </section>
+</main>

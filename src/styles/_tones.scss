@@ -1,0 +1,35 @@
+.tone-neutral {
+    --tone-bg: transparent;
+    --tone-fg: var(--slate-700);
+    --tone-border: var(--slate-400);
+}
+
+.tone-neutral-soft {
+    --tone-bg: var(--slate-200);
+    --tone-fg: var(--slate-800);
+    --tone-border: transparent;
+}
+
+.tone-accent {
+    --tone-bg: var(--teal-100);
+    --tone-fg: var(--teal-700);
+    --tone-border: transparent;
+}
+
+.tone-warning {
+    --tone-bg: var(--amber-100);
+    --tone-fg: var(--amber-800);
+    --tone-border: transparent;
+}
+
+.tone-success {
+    --tone-bg: var(--green-100);
+    --tone-fg: var(--green-800);
+    --tone-border: transparent;
+}
+
+.tone-danger {
+    --tone-bg: var(--red-100);
+    --tone-fg: var(--red-800);
+    --tone-border: transparent;
+}
