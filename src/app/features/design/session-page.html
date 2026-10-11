@@ -1,0 +1,99 @@
+<main class="page">
+  <header>
+    <h1>Sesión y API (página de desarrollo)</h1>
+    <p class="muted">Sirve para verificar la capa de sesión antes de construir las pantallas reales.</p>
+  </header>
+
+  @if (noticeText(); as text) {
+    <p class="notice" role="status">{{ text }}</p>
+  }
+
+  @if (auth.user(); as user) {
+    <section class="card">
+      <h2>Sesión activa</h2>
+      <p>
+        <strong>{{ user.fullName }}</strong> · <span class="mono">{{ user.email }}</span>
+      </p>
+      <p>
+        Roles:
+        @for (role of user.roles; track role) {
+          <span class="tag mono">{{ role }}</span>
+        }
+      </p>
+      <p class="muted">
+        @if (auth.lastRefreshAt(); as at) {
+          Última renovación a las {{ at | date: 'HH:mm:ss' }}.
+        } @else {
+          Aún no se ha renovado en esta carga de la página.
+        }
+        El token vive en cookies <code>HttpOnly</code>: en la consola, <code>document.cookie</code> solo
+        debe mostrar <code>XSRF-TOKEN</code>.
+      </p>
+      <div class="row">
+        <button type="button" (click)="renewNow()">Renovar sesión ahora</button>
+        <button type="button" (click)="auth.logout()">Cerrar sesión</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Rutas protegidas</h2>
+      <ul>
+        <li><a routerLink="/dev/authenticated">Cualquier usuario autenticado</a></li>
+        <li><a routerLink="/dev/staff">Solo AGENT o ADMIN</a></li>
+        <li><a routerLink="/dev/admin">Solo ADMIN</a></li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2>Probar la API</h2>
+      <div class="row">
+        @for (p of probes; track p.path) {
+          <button type="button" (click)="probe(p)">{{ p.label }}</button>
+        }
+      </div>
+      @if (result(); as r) {
+        <h3>{{ r.title }}</h3>
+        <pre>{{ r.body | json }}</pre>
+      }
+    </section>
+  } @else {
+    <section class="card">
+      <h2>Iniciar sesión</h2>
+      <label>
+        Correo
+        <input
+          type="email"
+          autocomplete="username"
+          [value]="email()"
+          (input)="email.set($any($event.target).value)"
+          list="demo-users"
+        />
+      </label>
+      <datalist id="demo-users">
+        @for (u of demoUsers; track u) {
+          <option [value]="u"></option>
+        }
+      </datalist>
+      <label>
+        Contraseña
+        <input
+          type="password"
+          autocomplete="current-password"
+          [value]="password()"
+          (input)="password.set($any($event.target).value)"
+        />
+      </label>
+      @if (loginError(); as message) {
+        <p class="error" role="alert">
+          {{ message }}
+          @if (retryAfter(); as seconds) {
+            Reintenta en {{ seconds }} s.
+          }
+        </p>
+      }
+      <button type="button" class="primary" [disabled]="busy()" (click)="signIn()">
+        {{ busy() ? 'Entrando…' : 'Entrar' }}
+      </button>
+    </section>
+  }
+</main>
