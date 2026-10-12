@@ -39,5 +39,9 @@ export const routes: Routes = [
     path: 'design/tokens',
     loadComponent: () => import('./features/design/tokens-page').then((m) => m.TokensPage),
   },
+  {
+    path: 'design/components',
+    loadComponent: () => import('./features/design/components-page').then((m) => m.ComponentsPage),
+  },
   { path: '**', redirectTo: 'design/tokens' },
 ];

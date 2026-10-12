@@ -1,0 +1,140 @@
+<main class="page">
+  <header>
+    <h1>Catálogo de componentes</h1>
+    <p class="muted">Página de desarrollo: cada componente del kit en todos sus estados.</p>
+  </header>
+
+  <section>
+    <h2>Iconos</h2>
+    <div class="icons">
+      @for (name of iconNames; track name) {
+        <div class="icon-cell">
+          <app-icon [name]="name" [size]="20" />
+          <code>{{ name }}</code>
+        </div>
+      }
+    </div>
+  </section>
+
+  <section>
+    <h2>Botones</h2>
+    @for (variant of variants; track variant) {
+      <div class="row">
+        <code class="row__label">{{ variant }}</code>
+        @for (size of sizes; track size) {
+          <button appButton [variant]="variant" [size]="size">Guardar cambios</button>
+        }
+        <button appButton [variant]="variant" disabled>Deshabilitado</button>
+        <button appButton [variant]="variant" [loading]="saving()" (click)="simulateSave()">
+          {{ saving() ? 'Guardando…' : 'Con carga' }}
+        </button>
+        <button appButton [variant]="variant" iconOnly aria-label="Agregar">
+          <app-icon name="plus" />
+        </button>
+        <button appButton [variant]="variant" size="sm">
+          <app-icon name="paperclip" [size]="14" /> Con icono
+        </button>
+      </div>
+    }
+    <div class="row">
+      <code class="row__label">como enlace</code>
+      <a appButton variant="primary" href="#">Ir a tickets</a>
+      <a appButton href="#" disabled>Enlace deshabilitado</a>
+    </div>
+  </section>
+
+  <section>
+    <h2>Campos</h2>
+    <div class="fields">
+      <app-field label="Asunto" hint="Máximo 200 caracteres" [required]="true">
+        <input appControl type="text" placeholder="Describe el problema" />
+      </app-field>
+
+      <app-field label="Correo" [error]="'Ingresa un correo electrónico válido.'" [required]="true">
+        <input appControl type="email" value="lucia@" />
+      </app-field>
+
+      <app-field label="Descripción" hint="Entre 10 y 5000 caracteres">
+        <textarea appControl rows="3" placeholder="Cuéntanos qué pasó"></textarea>
+      </app-field>
+
+      <app-field label="Categoría">
+        <select appControl>
+          <option value="">Selecciona una categoría</option>
+          <option>Hardware</option>
+          <option>Software</option>
+          <option>Red</option>
+        </select>
+      </app-field>
+
+      <app-field label="Número de serie">
+        <input appControl type="text" value="SN-0001" disabled />
+      </app-field>
+
+      <app-field label="Prioridad" [error]="'Selecciona una prioridad.'">
+        <select appControl>
+          <option value="">Selecciona…</option>
+          <option>Baja</option>
+        </select>
+      </app-field>
+
+      <label class="check">
+        <input type="checkbox" [checked]="checked()" (change)="checked.set(!checked())" />
+        Recordar mi correo en este equipo
+      </label>
+    </div>
+  </section>
+
+  <section>
+    <h2>Chips por tono</h2>
+    <div class="row">
+      @for (tone of tones; track tone) {
+        <app-chip [tone]="tone">{{ tone }}</app-chip>
+      }
+      <app-chip tone="neutral" voided>anulado</app-chip>
+    </div>
+  </section>
+
+  <section>
+    <h2>Estados de ticket</h2>
+    <div class="row">
+      @for (status of ticketStatuses; track status) {
+        <app-ticket-status [status]="status" />
+      }
+    </div>
+    <h2>Estados de activo</h2>
+    <div class="row">
+      @for (status of assetStatuses; track status) {
+        <app-asset-status [status]="status" />
+      }
+    </div>
+    <h2>Prioridades</h2>
+    <div class="row">
+      @for (priority of priorities; track priority) {
+        <app-priority [priority]="priority" />
+      }
+    </div>
+    <div class="row">
+      <code class="row__label">solo icono</code>
+      @for (priority of priorities; track priority) {
+        <app-priority [priority]="priority" [showLabel]="false" />
+      }
+    </div>
+  </section>
+
+  <section>
+    <h2>Avatares</h2>
+    <div class="row">
+      @for (name of names; track name) {
+        <app-avatar [name]="name" />
+      }
+      <app-avatar [name]="null" />
+    </div>
+    <div class="row">
+      <app-avatar name="Lucía Usuaria" size="sm" />
+      <app-avatar name="Lucía Usuaria" size="md" />
+      <app-avatar name="Lucía Usuaria" size="lg" />
+      <app-avatar [name]="null" size="lg" />
+    </div>
+  </section>
+</main>

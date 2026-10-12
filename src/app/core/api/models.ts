@@ -1,5 +1,9 @@
 export type Role = 'ADMIN' | 'AGENT' | 'ASSET_MANAGER' | 'USER';
 
+export type TicketStatus = 'OPEN' | 'IN_PROGRESS' | 'WAITING' | 'RESOLVED' | 'CLOSED' | 'CANCELLED';
+export type TicketPriority = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+export type AssetStatus = 'AVAILABLE' | 'ASSIGNED' | 'MAINTENANCE' | 'RETIRED';
+
 export interface PageResponse<T> {
   content: T[];
   page: number;
