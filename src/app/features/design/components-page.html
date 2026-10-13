@@ -137,4 +137,115 @@
       <app-avatar [name]="null" size="lg" />
     </div>
   </section>
+  <section>
+    <h2>Estados de la interfaz</h2>
+    <div class="grid-2">
+      <div class="box">
+        <app-empty-state
+          title="Aún no hay tickets"
+          description="Cuando crees uno, aparecerá aquí con su estado y su prioridad."
+        >
+          <button appButton variant="primary">
+            <app-icon name="plus" [size]="14" /> Crear ticket
+          </button>
+        </app-empty-state>
+      </div>
+      <div class="box">
+        <app-error-state [error]="serverError" (retry)="showToast('info')" />
+      </div>
+      <div class="box">
+        <app-error-state [error]="networkError" title="Sin conexión" (retry)="showToast('info')" />
+      </div>
+      <div class="box box--pad" role="status" aria-label="Cargando tickets">
+        <app-skeleton [lines]="3" />
+        <div class="skeleton-row">
+          <app-skeleton width="2.5rem" height="2.5rem" round />
+          <app-skeleton [lines]="2" />
+        </div>
+        <div class="spinner-row"><app-spinner /> Cargando…</div>
+      </div>
+    </div>
+  </section>
+  <section>
+    <h2>Avisos emergentes</h2>
+    <p class="muted">
+      Se pausan con el ratón encima o con el foco dentro. El mismo aviso repetido no se apila.
+      Máximo 4 a la vez.
+    </p>
+    <div class="row">
+      <button appButton (click)="showToast('success')">Éxito</button>
+      <button appButton (click)="showToast('info')">Información</button>
+      <button appButton (click)="showToast('warning')">Advertencia</button>
+      <button appButton (click)="showToast('error')">Error</button>
+    </div>
+  </section>
+  <section>
+    <h2>Diálogos</h2>
+    <p class="muted">
+      Tab no sale del diálogo, Escape lo cierra y el foco vuelve al botón que lo abrió. El foco
+      inicial cae en «Cancelar».
+    </p>
+    <div class="row">
+      <button appButton variant="primary" (click)="confirmPlain()">Confirmar acción</button>
+      <button appButton variant="danger" (click)="confirmDestructive()">Acción destructiva</button>
+    </div>
+  </section>
+  <section>
+    <h2>Tabla, orden y paginación</h2>
+    <div class="table-wrap">
+      <table class="table">
+        <caption class="sr-only">
+          Tickets de ejemplo
+        </caption>
+        <thead>
+          <tr>
+            <th appSortHeader="ticketCode" [sort]="sort()" (sortChange)="sort.set($event)">
+              Código
+            </th>
+            <th appSortHeader="title" [sort]="sort()" (sortChange)="sort.set($event)">Asunto</th>
+            <th>Estado</th>
+            <th
+              appSortHeader="priority"
+              firstDirection="desc"
+              [sort]="sort()"
+              (sortChange)="sort.set($event)"
+            >
+              Prioridad
+            </th>
+            <th>Agente</th>
+            <th
+              appSortHeader="age"
+              class="cell-num"
+              [sort]="sort()"
+              (sortChange)="sort.set($event)"
+            >
+              Antigüedad
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of sortedRows(); track row.ticketCode) {
+            <tr>
+              <td class="cell-code">{{ row.ticketCode }}</td>
+              <td class="cell-wrap">{{ row.title }}</td>
+              <td><app-ticket-status [status]="row.status" /></td>
+              <td><app-priority [priority]="row.priority" /></td>
+              <td>
+                <app-avatar [name]="row.agent" size="sm" />
+                <span class="agent-name">{{ row.agent ?? 'Sin asignar' }}</span>
+              </td>
+              <td class="cell-num">{{ formatAge(row.age) }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <app-pagination
+      [page]="page()"
+      [size]="size()"
+      [totalElements]="total"
+      (pageChange)="page.set($event)"
+      (sizeChange)="changeSize($event)"
+    />
+  </section>
 </main>

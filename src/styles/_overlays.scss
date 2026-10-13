@@ -1,0 +1,11 @@
+.cdk-overlay-container {
+    z-index: var(--z-overlay) !important;
+}
+
+.app-dialog-backdrop {
+    background: var(--color-backdrop);
+}
+
+.app-dialog-panel {
+    max-width: calc(100vw - 2rem);
+}

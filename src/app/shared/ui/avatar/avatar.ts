@@ -19,6 +19,7 @@ export type AvatarSize = 'sm' | 'md' | 'lg';
       display: inline-grid;
       place-items: center;
       flex-shrink: 0;
+      vertical-align: middle;
       width: 1.5rem;
       height: 1.5rem;
       font-size: var(--text-xs);

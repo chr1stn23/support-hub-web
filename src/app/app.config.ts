@@ -10,6 +10,7 @@ import { provideHttpClient, withInterceptors, withXsrfConfiguration } from '@ang
 import { errorInterceptor } from '@core/auth/error.interceptor';
 import { AuthService } from '@core/auth/auth.service';
 import { sessionInterceptor } from '@core/auth/session.interceptor';
+import { OVERLAY_DEFAULT_CONFIG } from '@angular/cdk/overlay';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -23,5 +24,11 @@ export const appConfig: ApplicationConfig = {
     ),
     // El router no navega hasta saber si hay una sesión viva
     provideAppInitializer(() => inject(AuthService).restore()),
+    {
+      provide: OVERLAY_DEFAULT_CONFIG,
+      useValue: {
+        usePopover: false
+      }
+    }
   ],
 };

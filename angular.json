@@ -37,6 +37,7 @@
               "@fontsource/ibm-plex-sans/400.css",
               "@fontsource/ibm-plex-sans/500.css",
               "@fontsource/ibm-plex-mono/400.css",
+              "@angular/cdk/overlay-prebuilt.css",
               "src/styles.scss"
             ]
           },
