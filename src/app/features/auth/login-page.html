@@ -1,0 +1,79 @@
+<main class="login">
+  <div class="card">
+    <div class="brand">
+      <span class="brand__mark" aria-hidden="true">S</span>
+      <span class="brand__name">SupportHub</span>
+    </div>
+
+    <h1>Inicia sesión</h1>
+    <p class="subtitle">Accede con tu cuenta de la organización.</p>
+
+    @if (notice(); as text) {
+      <p class="callout" role="status">
+        <app-icon name="info" [size]="16" />
+        <span>{{ text }}</span>
+      </p>
+    }
+
+    <form class="form" (submit)="onSubmit($event)" novalidate>
+      <app-field label="Correo" [error]="emailError()" [required]="true">
+        <input
+          #emailInput
+          appControl
+          type="email"
+          autocomplete="username"
+          [value]="email()"
+          (input)="email.set($any($event.target).value)"
+        />
+      </app-field>
+
+      <app-field label="Contraseña" [error]="passwordError()" [required]="true">
+        <input
+          #passwordInput
+          appControl
+          type="password"
+          autocomplete="current-password"
+          [value]="password()"
+          (input)="password.set($any($event.target).value)"
+        />
+      </app-field>
+
+      @if (serverError(); as message) {
+        <p class="callout callout--error" role="alert">
+          <app-icon name="alert-triangle" [size]="16" />
+          <span>
+            {{ message }}
+            @if (locked()) {
+              Podrás intentarlo de nuevo en <strong class="num">{{ countdown() }}</strong
+              >.
+            }
+          </span>
+        </p>
+      }
+
+      <button
+        appButton
+        variant="primary"
+        size="lg"
+        type="submit"
+        [loading]="busy()"
+        [disabled]="locked()"
+      >
+        Entrar
+      </button>
+    </form>
+
+    @if (demoAccounts.length > 0) {
+      <div class="demo">
+        <p class="demo__title">Cuentas de demostración (solo desarrollo)</p>
+        <div class="demo__list">
+          @for (account of demoAccounts; track account) {
+            <button appButton size="sm" type="button" (click)="useDemo(account)">
+              {{ account }}
+            </button>
+          }
+        </div>
+      </div>
+    }
+  </div>
+</main>

@@ -96,6 +96,7 @@ export const ICONS = {
     rect(3, 14, 8, 7, 1),
   ],
   'clipboard-list': [rect(6, 4, 12, 17, 2), path('M9 4h6v3H9Z'), path('M9 12h6'), path('M9 16h6')],
+  box: [path('M3 7.5 12 3l9 4.5v9L12 21l-9-4.5v-9Z'), path('M3 7.5 12 12l9-4.5'), path('M12 12v9')],
 } as const satisfies Record<string, readonly Shape[]>;
 
 export type IconName = keyof typeof ICONS;

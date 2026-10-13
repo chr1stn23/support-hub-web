@@ -32,3 +32,7 @@ export interface LoginResponse {
   expiresIn: number;
   user: UserResponse;
 }
+
+export interface UnreadCountResponse {
+  count: number;
+}

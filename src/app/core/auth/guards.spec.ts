@@ -64,8 +64,8 @@ describe('guards', () => {
     expect(run(roleGuard('AGENT', 'ADMIN'))).toBe(true);
   });
 
-  it('roleGuard redirects everyone else to /forbidden', () => {
+  it('roleGuard redirects everyone else to /acceso-denegado', () => {
     loginAs('USER', 'ASSET_MANAGER');
-    expect(router.serializeUrl(run(roleGuard('ADMIN')) as UrlTree)).toBe('/forbidden');
+    expect(router.serializeUrl(run(roleGuard('ADMIN')) as UrlTree)).toBe('/acceso-denegado');
   });
 });

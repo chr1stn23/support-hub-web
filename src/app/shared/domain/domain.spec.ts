@@ -7,6 +7,9 @@ import {
   ASSET_STATUS,
   ASSET_STATUS_ORDER,
   PRIORITY_ORDER,
+  ROLE_LABEL,
+  ROLE_ORDER,
+  sortedRoleLabels,
   TICKET_PRIORITY,
   TICKET_STATUS,
   TICKET_STATUS_ORDER,
@@ -49,6 +52,14 @@ describe('labels', () => {
 
   it('lists priorities from least to most severe', () => {
     expect(PRIORITY_ORDER).toEqual(['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']);
+  });
+
+  it('names every role and sorts them by influence', () => {
+    expect(ROLE_ORDER).toEqual(['ADMIN', 'AGENT', 'ASSET_MANAGER', 'USER']);
+    expect(Object.keys(ROLE_LABEL).sort()).toEqual([...ROLE_ORDER].sort());
+    expect(sortedRoleLabels(['USER', 'ADMIN'])).toEqual(['Administrador', 'Usuario']);
+    expect(sortedRoleLabels(['USER'])).toEqual(['Usuario']);
+    expect(sortedRoleLabels([])).toEqual([]);
   });
 });
 

@@ -1,0 +1,82 @@
+<a class="skip-link" href="#main-content" (click)="skipToMain($event)">Saltar al contenido</a>
+
+<div class="shell">
+  <aside class="sidebar" id="app-nav" [class.is-open]="navOpen()">
+    <a class="brand" routerLink="/resumen">
+      <span class="brand__mark" aria-hidden="true">S</span>
+      <span class="brand__name">SupportHub</span>
+    </a>
+
+    <a appButton variant="primary" class="new-ticket" routerLink="/tickets/nuevo">
+      <app-icon name="plus" [size]="14" />
+      Nuevo ticket
+    </a>
+
+    <nav class="nav" aria-label="Principal">
+      @for (group of groups(); track group.label) {
+        <div class="group">
+          <p class="group__label">{{ group.label }}</p>
+          <ul class="group__list">
+            @for (item of group.items; track item.path) {
+              <li>
+                <a
+                  class="link"
+                  [routerLink]="item.path"
+                  routerLinkActive="is-active"
+                  ariaCurrentWhenActive="page"
+                >
+                  <app-icon [name]="item.icon" [size]="16" />
+                  {{ item.label }}
+                </a>
+              </li>
+            }
+          </ul>
+        </div>
+      }
+    </nav>
+  </aside>
+
+  @if (navOpen()) {
+    <button class="scrim" type="button" aria-label="Cerrar menú" (click)="closeNav()"></button>
+  }
+
+  <div class="column">
+    <header class="topbar">
+      <button
+        appButton
+        variant="ghost"
+        iconOnly
+        class="menu-button"
+        type="button"
+        aria-controls="app-nav"
+        [attr.aria-expanded]="navOpen()"
+        aria-label="Abrir menú"
+        (click)="navOpen.set(!navOpen())"
+      >
+        <app-icon name="menu" [size]="18" />
+      </button>
+
+      <div class="topbar__end">
+        <span class="bell">
+          <a
+            appButton
+            variant="ghost"
+            iconOnly
+            routerLink="/notificaciones"
+            [attr.aria-label]="bellLabel()"
+          >
+            <app-icon name="bell" [size]="18" />
+          </a>
+          @if (unread() > 0) {
+            <span class="bell__badge" aria-hidden="true">{{ unreadText() }}</span>
+          }
+        </span>
+        <app-user-menu />
+      </div>
+    </header>
+
+    <main id="main-content" class="content" tabindex="-1" #main>
+      <router-outlet />
+    </main>
+  </div>
+</div>

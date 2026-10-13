@@ -8,6 +8,9 @@ export {
   TICKET_STATUS_ORDER,
   type PriorityMeta,
   type StatusMeta,
+  ROLE_LABEL,
+  ROLE_ORDER,
+  sortedRoleLabels,
 } from './labels';
 export { PriorityBadge } from './priority-badge';
 export { TicketStatusChip } from './ticket-status-chip';

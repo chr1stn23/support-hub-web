@@ -21,6 +21,6 @@ export function roleGuard(...allowed: Role[]): CanActivateFn {
   return () => {
     return inject(AuthService).hasAnyRole(allowed)
       ? true
-      : inject(Router).createUrlTree(['/forbidden']);
+      : inject(Router).createUrlTree(['/acceso-denegado']);
   };
 }

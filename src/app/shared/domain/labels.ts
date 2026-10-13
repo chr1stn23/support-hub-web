@@ -1,4 +1,4 @@
-import { AssetStatus, TicketPriority, TicketStatus } from '@core/api/models';
+import { AssetStatus, Role, TicketPriority, TicketStatus } from '@core/api/models';
 import { IconName, Tone } from '@shared/ui';
 
 export interface StatusMeta {
@@ -57,3 +57,16 @@ export const ASSET_STATUS_ORDER: readonly AssetStatus[] = [
 
 /** De menor a mayor gravedad. */
 export const PRIORITY_ORDER: readonly TicketPriority[] = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'];
+
+export const ROLE_LABEL: Record<Role, string> = {
+  ADMIN: 'Administrador',
+  AGENT: 'Agente',
+  ASSET_MANAGER: 'Gestor de activos',
+  USER: 'Usuario',
+};
+
+export const ROLE_ORDER: readonly Role[] = ['ADMIN', 'AGENT', 'ASSET_MANAGER', 'USER'];
+
+export function sortedRoleLabels(roles: readonly Role[]): string[] {
+  return ROLE_ORDER.filter((role) => roles.includes(role)).map((role) => ROLE_LABEL[role]);
+}
