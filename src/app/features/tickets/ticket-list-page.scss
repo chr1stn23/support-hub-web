@@ -1,0 +1,120 @@
+.views {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  margin-bottom: var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.view {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  height: 2.25rem;
+  padding: 0 var(--space-3);
+  margin-bottom: -1px;
+  font-size: var(--text-md);
+  color: var(--color-text-secondary);
+  border-bottom: 2px solid transparent;
+
+  &:hover {
+    color: var(--color-text);
+    text-decoration: none;
+  }
+
+  &.is-active {
+    font-weight: var(--weight-medium);
+    color: var(--color-text-selected);
+    border-bottom-color: var(--color-accent);
+  }
+
+  &__count {
+    padding: 0 6px;
+    font-size: var(--text-xs);
+    line-height: 1.25rem;
+    color: var(--color-text-secondary);
+    background: var(--color-bg-hover);
+    border-radius: var(--radius-full);
+  }
+
+  &.is-active &__count {
+    color: var(--color-text-selected);
+    background: var(--color-bg-selected);
+  }
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+
+  .control {
+    width: auto;
+    min-width: 11rem;
+  }
+}
+
+.search {
+  position: relative;
+  flex: 1 1 18rem;
+  max-width: 26rem;
+
+  app-icon {
+    position: absolute;
+    top: 50%;
+    left: var(--space-3);
+    color: var(--color-text-secondary);
+    transform: translateY(-50%);
+    pointer-events: none;
+  }
+
+  .control {
+    width: 100%;
+    padding-left: 2.25rem;
+  }
+}
+
+.table-wrap.is-stale {
+  opacity: 0.55;
+  transition: opacity var(--dur-base) var(--ease-out);
+}
+
+.title {
+  display: block;
+  font-weight: var(--weight-medium);
+  color: var(--color-text);
+}
+
+.category {
+  display: block;
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+}
+
+.person {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+
+  &--none {
+    color: var(--color-text-secondary);
+  }
+}
+
+.col-action {
+  width: 1%;
+  text-align: right;
+}
+
+.pager {
+  display: block;
+  margin-top: var(--space-4);
+}
+
+.loading__rows {
+  display: grid;
+  gap: var(--space-5);
+  padding: var(--space-5);
+}

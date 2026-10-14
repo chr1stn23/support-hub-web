@@ -20,3 +20,5 @@ export { SortHeader } from './table/sort-header';
 export { ToastOutlet } from './toast/toast-outlet';
 export { ToastService, type Toast, type ToastKind } from './toast/toast.service';
 export { PageHeader } from './page-header/page-header';
+export { absoluteDateTime, relativeTime } from './time/relative-time';
+export { Time } from './time/time';

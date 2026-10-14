@@ -44,7 +44,8 @@ export const routes: Routes = [
       {
         path: 'tickets',
         title: 'Tickets',
-        loadComponent: placeholder,
+        loadComponent: () =>
+          import('./features/tickets/ticket-list-page').then((m) => m.TicketListPage),
         data: { heading: 'Tickets', description: 'Solicitudes de soporte y su estado.' },
       },
       {

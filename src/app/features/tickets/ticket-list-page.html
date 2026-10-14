@@ -1,0 +1,186 @@
+<app-page-header title="Tickets" [description]="description()">
+  <a appButton variant="primary" routerLink="/tickets/nuevo">
+    <app-icon name="plus" [size]="14" />
+    Nuevo ticket
+  </a>
+</app-page-header>
+
+<nav class="views" aria-label="Vistas de tickets">
+  @for (view of views(); track view.id) {
+    @let count = countOf(view.id);
+    <a
+      class="view"
+      [routerLink]="[]"
+      [queryParams]="tabParams(view.id)"
+      [class.is-active]="state().view === view.id"
+      [attr.aria-current]="state().view === view.id ? 'page' : null"
+    >
+      {{ view.label }}
+      @if (count !== null) {
+        <span class="view__count num">{{ count }}</span>
+      }
+    </a>
+  }
+</nav>
+
+<div class="filters" role="search">
+  <div class="search">
+    <app-icon name="search" [size]="16" />
+    <input
+      class="control"
+      type="search"
+      aria-label="Buscar tickets"
+      placeholder="Buscar por asunto, descripción o código"
+      maxlength="100"
+      [value]="searchDraft()"
+      (input)="searchDraft.set($any($event.target).value)"
+    />
+  </div>
+
+  <select class="control" aria-label="Filtrar por categoría" (change)="setCategory($event)">
+    <option value="" [selected]="state().categoryId === ''">Todas las categorías</option>
+    @for (category of categoryOptions(); track category.id) {
+      <option [value]="category.id" [selected]="category.id === state().categoryId">{{ category.name }}</option>
+    }
+  </select>
+
+  @if (state().view !== 'prioridad-alta') {
+    <select class="control" aria-label="Filtrar por prioridad" (change)="setPriority($event)">
+      <option value="" [selected]="state().priority === ''">Todas las prioridades</option>
+      @for (option of priorityOptions; track option.value) {
+        <option [value]="option.value" [selected]="option.value === state().priority">{{ option.label }}</option>
+      }
+    </select>
+  }
+
+  @if (hasFilters()) {
+    <button appButton variant="ghost" type="button" (click)="clearFilters()">
+      <app-icon name="x" [size]="14" />
+      Limpiar filtros
+    </button>
+  }
+</div>
+
+<p class="sr-only" aria-live="polite">{{ announcement() }}</p>
+
+@if (error(); as failure) {
+  <app-error-state [error]="failure" title="No pudimos cargar los tickets" (retry)="reload()" />
+} @else if (page(); as data) {
+  @if (data.content.length === 0) {
+    @if (hasFilters()) {
+      <app-empty-state
+        icon="search"
+        title="Ningún ticket coincide con tu búsqueda"
+        description="Prueba con otras palabras o quita algún filtro."
+      >
+        <button appButton type="button" (click)="clearFilters()">Limpiar filtros</button>
+      </app-empty-state>
+    } @else {
+      <app-empty-state
+        title="No hay tickets en esta vista"
+        description="Cuando haya solicitudes que coincidan, aparecerán aquí."
+      >
+        <a appButton variant="primary" routerLink="/tickets/nuevo">
+          <app-icon name="plus" [size]="14" />
+          Crear un ticket
+        </a>
+      </app-empty-state>
+    }
+  } @else {
+    <div class="table-wrap" [class.is-stale]="loading()" [attr.aria-busy]="loading() ? 'true' : null">
+      <table class="table">
+        <caption class="sr-only">
+          Lista de tickets
+        </caption>
+        <thead>
+        <tr>
+          <th appSortHeader="ticketCode" [sort]="state().sort" (sortChange)="onSort($event)">Código</th>
+          <th appSortHeader="title" [sort]="state().sort" (sortChange)="onSort($event)">Asunto</th>
+          <th>Estado</th>
+          <th appSortHeader="priority" firstDirection="desc" [sort]="state().sort" (sortChange)="onSort($event)">
+            Prioridad
+          </th>
+          @if (canViewAll()) {
+            <th>Solicitante</th>
+          }
+          <th>Agente</th>
+          <th appSortHeader="createdAt" firstDirection="desc" [sort]="state().sort" (sortChange)="onSort($event)">
+            Creado
+          </th>
+          <th class="col-action"><span class="sr-only">Acciones</span></th>
+        </tr>
+        </thead>
+        <tbody>
+          @for (ticket of data.content; track ticket.id) {
+            <tr>
+              <td class="cell-code">
+                <a [routerLink]="['/tickets', ticket.id]" [attr.aria-label]="'Abrir ticket ' + ticket.ticketCode">
+                  {{ ticket.ticketCode }}
+                </a>
+              </td>
+              <td class="cell-wrap">
+                <a class="title" [routerLink]="['/tickets', ticket.id]">{{ ticket.title }}</a>
+                <span class="category">{{ ticket.categoryName }}</span>
+              </td>
+              <td>
+                <app-ticket-status [status]="ticket.status" />
+              </td>
+              <td>
+                <app-priority [priority]="ticket.priority" />
+              </td>
+              @if (canViewAll()) {
+                <td>
+                  <span class="person">
+                    <app-avatar [name]="ticket.requester.fullName" size="sm" />
+                    {{ ticket.requester.fullName }}
+                  </span>
+                </td>
+              }
+              <td>
+                <span class="person" [class.person--none]="!ticket.agent">
+                  <app-avatar [name]="ticket.agent?.fullName" size="sm" />
+                  {{ ticket.agent?.fullName ?? 'Sin asignar' }}
+                </span>
+              </td>
+              <td>
+                <app-time [value]="ticket.createdAt" />
+              </td>
+              <td class="col-action">
+                @if (ticket.canAssignToSelf) {
+                  <button
+                    appButton
+                    size="sm"
+                    type="button"
+                    [loading]="isTaking(ticket.id)"
+                    [attr.aria-label]="'Tomar el ticket ' + ticket.ticketCode"
+                    (click)="take(ticket)"
+                  >
+                    Tomar
+                  </button>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <app-pagination
+      class="pager"
+      [page]="state().page"
+      [size]="state().size"
+      [totalElements]="data.totalElements"
+      [sizeOptions]="sizeOptions"
+      (pageChange)="onPage($event)"
+      (sizeChange)="onSize($event)"
+    />
+  }
+} @else {
+  <div class="table-wrap loading" role="status" aria-label="Cargando tickets">
+    <div class="loading__rows">
+      @for (row of [1, 2, 3, 4, 5, 6]; track row) {
+        <app-skeleton height="1rem" />
+      }
+    </div>
+  </div>
+}
