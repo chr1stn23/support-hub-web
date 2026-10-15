@@ -2,6 +2,7 @@ import { isDevMode } from '@angular/core';
 import { Routes } from '@angular/router';
 import { ACCESS } from '@core/auth/access';
 import { authGuard, guestGuard, roleGuard } from '@core/auth/guards';
+import { unsavedChangesGuard } from '@core/auth/unsaved-changes.guard';
 
 const placeholder = () =>
   import('./features/placeholder/placeholder-page').then((m) => m.PlaceholderPage);
@@ -51,14 +52,15 @@ export const routes: Routes = [
       {
         path: 'tickets/nuevo',
         title: 'Nuevo ticket',
-        loadComponent: placeholder,
-        data: { heading: 'Nuevo ticket', description: 'Cuéntanos qué necesitas.' },
+        canDeactivate: [unsavedChangesGuard],
+        loadComponent: () =>
+          import('./features/tickets/ticket-create-page').then((m) => m.TicketCreatePage),
       },
       {
         path: 'tickets/:id',
         title: 'Ticket',
-        loadComponent: placeholder,
-        data: { heading: 'Detalle del ticket' },
+        loadComponent: () =>
+          import('./features/tickets/ticket-detail-page').then((m) => m.TicketDetailPage),
       },
       {
         path: 'mis-equipos',

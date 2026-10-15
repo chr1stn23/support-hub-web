@@ -1,0 +1,87 @@
+<app-page-header title="Nuevo ticket" description="Cuéntanos qué necesitas. Un agente lo revisará pronto." />
+
+<form class="form" (submit)="onSubmit($event)" novalidate>
+  @if (errorSummary(); as summary) {
+    <p class="callout callout--error" role="alert">
+      <app-icon name="alert-triangle" [size]="16" />
+      {{ summary }}
+    </p>
+  }
+  @if (formError(); as message) {
+    <p class="callout callout--error" role="alert">
+      <app-icon name="alert-triangle" [size]="16" />
+      {{ message }}
+    </p>
+  }
+  @if (categoriesFailed()) {
+    <p class="callout callout--error" role="alert">
+      <app-icon name="alert-triangle" [size]="16" />
+      No pudimos cargar las categorías.
+      <button appButton size="sm" type="button" (click)="reloadCatalogs()">Reintentar</button>
+    </p>
+  }
+
+  <app-field label="Asunto" hint="Un resumen corto del problema" [error]="errorFor('title')" [required]="true">
+    <input
+      appControl
+      type="text"
+      autocomplete="off"
+      [formField]="form.title"
+      (input)="clearServerError('title')"
+    />
+  </app-field>
+
+  <div class="pair">
+    <app-field label="Categoría" [error]="errorFor('categoryId')" [required]="true">
+      <select appControl [formField]="form.categoryId" (change)="clearServerError('categoryId')">
+        <option value="">Selecciona una categoría</option>
+        @for (category of categoryOptions(); track category.id) {
+          <option [value]="category.id">{{ category.name }}</option>
+        }
+      </select>
+    </app-field>
+
+    <app-field label="Prioridad" [error]="errorFor('priority')" [required]="true">
+      <select appControl [formField]="form.priority" (change)="clearServerError('priority')">
+        @for (option of priorityOptions; track option.value) {
+          <option [value]="option.value">{{ option.label }}</option>
+        }
+      </select>
+    </app-field>
+  </div>
+
+  <app-field
+    label="Equipo relacionado"
+    [hint]="assetOptions().length === 0 ? 'No tienes equipos asignados.' : 'Opcional. Solo ves los equipos que tienes asignados.'"
+    [error]="errorFor('assetId')"
+  >
+    <select
+      appControl
+      [formField]="form.assetId"
+      (change)="clearServerError('assetId')"
+    >
+      <option value="">Ninguno</option>
+      @for (asset of assetOptions(); track asset.id) {
+        <option [value]="asset.id">{{ asset.label }}</option>
+      }
+    </select>
+  </app-field>
+
+  <app-field label="Descripción" [error]="errorFor('description')" [required]="true">
+    <textarea
+      appControl
+      rows="7"
+      placeholder="¿Qué pasó? ¿Desde cuándo? ¿Qué ya probaste?"
+      [formField]="form.description"
+      (input)="clearServerError('description')"
+      (keydown.control.enter)="onSubmit($event)"
+      (keydown.meta.enter)="onSubmit($event)"
+    ></textarea>
+  </app-field>
+  <p class="counter num" aria-hidden="true">{{ descriptionLength() }} / 5000</p>
+
+  <div class="actions">
+    <a appButton routerLink="/tickets">Cancelar</a>
+    <button appButton variant="primary" type="submit" [loading]="busy()">Crear ticket</button>
+  </div>
+</form>

@@ -1,0 +1,166 @@
+<a class="back" routerLink="/tickets">
+  <app-icon name="chevron-left" [size]="14" />
+  Tickets
+</a>
+
+@if (notFound()) {
+  <app-empty-state
+    icon="search"
+    title="No encontramos este ticket"
+    description="Puede que ya no exista o que no tengas acceso a él."
+  >
+    <a appButton variant="primary" routerLink="/tickets">Volver a los tickets</a>
+  </app-empty-state>
+} @else if (ticketError(); as failure) {
+  <app-error-state [error]="failure" title="No pudimos cargar el ticket" (retry)="reloadAll()" />
+} @else if (view(); as t) {
+  <header class="head">
+    <div class="head__text">
+      <p class="code mono">{{ t.ticketCode }}</p>
+      <h1>{{ t.title }}</h1>
+      <div class="badges">
+        <app-ticket-status [status]="t.status" />
+        <app-priority [priority]="t.priority" />
+      </div>
+    </div>
+    <div class="head__actions">
+      @if (t.actions.assignToSelf) {
+        <button appButton variant="primary" type="button" [loading]="taking()" (click)="take()">
+          {{ takeLabel() }}
+        </button>
+      }
+    </div>
+  </header>
+
+  <div class="layout">
+    <div class="main">
+      <section class="block" aria-labelledby="description-title">
+        <h2 id="description-title">Descripción</h2>
+        <p class="text">{{ t.description }}</p>
+      </section>
+
+      <section class="block" aria-labelledby="comments-title">
+        <h2 id="comments-title">
+          Comentarios
+          @if (commentList(); as list) {
+            <span class="count num">{{ list.length }}</span>
+          }
+        </h2>
+
+        @if (commentsFailed()) {
+          <app-error-state title="No pudimos cargar los comentarios" (retry)="comments.reload()" />
+        } @else if (commentList(); as list) {
+          <ul class="comments">
+            @for (comment of list; track comment.id) {
+              <li class="comment">
+                <app-avatar [name]="comment.author.fullName" />
+                <div class="comment__body">
+                  <p class="comment__head">
+                    <strong>{{ comment.author.fullName }}</strong>
+                    @if (comment.author.id === t.requester.id) {
+                      <app-chip tone="neutral-soft">Solicitante</app-chip>
+                    }
+                    <app-time [value]="comment.createdAt" />
+                  </p>
+                  <p class="text">{{ comment.body }}</p>
+                </div>
+              </li>
+            } @empty {
+              <li class="muted">Aún no hay comentarios.</li>
+            }
+          </ul>
+        } @else {
+          <app-skeleton [lines]="3" />
+        }
+
+        @if (t.actions.comment) {
+          <app-comment-form [ticketId]="t.id" (posted)="comments.reload()" (locked)="refreshTicket()" />
+        } @else {
+          <p class="notice">
+            <app-icon name="info" [size]="16" />
+            Este ticket está cerrado o cancelado y ya no admite comentarios.
+          </p>
+        }
+      </section>
+
+      <section class="block" aria-labelledby="history-title">
+        <h2 id="history-title">Historial</h2>
+        @if (historyFailed()) {
+          <app-error-state title="No pudimos cargar el historial" (retry)="history.reload()" />
+        } @else if (historyList(); as events) {
+          <app-history-timeline [events]="events" />
+        } @else {
+          <app-skeleton [lines]="4" />
+        }
+      </section>
+    </div>
+
+    <aside class="side" aria-label="Detalles del ticket">
+      <dl class="details">
+        <div class="row">
+          <dt>Solicitante</dt>
+          <dd class="person">
+            <app-avatar [name]="t.requester.fullName" size="sm" />
+            {{ t.requester.fullName }}
+          </dd>
+        </div>
+        <div class="row">
+          <dt>Agente</dt>
+          <dd class="person" [class.muted]="!t.agent">
+            <app-avatar [name]="t.agent?.fullName" size="sm" />
+            {{ t.agent?.fullName ?? 'Sin asignar' }}
+          </dd>
+        </div>
+        <div class="row">
+          <dt>Categoría</dt>
+          <dd>{{ t.category.name }}</dd>
+        </div>
+        <div class="row">
+          <dt>Equipo</dt>
+          <dd>
+            @if (t.asset; as asset) {
+              <span class="mono asset">{{ asset.assetTag }}</span>
+              {{ asset.brand }} {{ asset.model }}
+            } @else {
+              <span class="muted">Ninguno</span>
+            }
+          </dd>
+        </div>
+        <div class="row">
+          <dt>Creado</dt>
+          <dd>
+            <app-time [value]="t.createdAt" />
+          </dd>
+        </div>
+        <div class="row">
+          <dt>Actualizado</dt>
+          <dd>
+            <app-time [value]="t.updatedAt" />
+          </dd>
+        </div>
+        @if (t.resolvedAt; as resolvedAt) {
+          <div class="row">
+            <dt>Resuelto</dt>
+            <dd>
+              <app-time [value]="resolvedAt" />
+            </dd>
+          </div>
+        }
+        @if (t.closedAt; as closedAt) {
+          <div class="row">
+            <dt>Cerrado</dt>
+            <dd>
+              <app-time [value]="closedAt" />
+            </dd>
+          </div>
+        }
+      </dl>
+    </aside>
+  </div>
+} @else {
+  <div role="status" aria-label="Cargando el ticket" class="loading">
+    <app-skeleton width="8rem" />
+    <app-skeleton width="60%" height="1.75rem" />
+    <app-skeleton [lines]="4" />
+  </div>
+}

@@ -1,0 +1,21 @@
+<form class="form" (submit)="onSubmit($event)" novalidate>
+  <app-field label="Agregar un comentario" [error]="error()">
+    <textarea
+      appControl
+      rows="3"
+      placeholder="Escribe aquí…"
+      [formField]="form.body"
+      (keydown.control.enter)="onSubmit($event)"
+      (keydown.meta.enter)="onSubmit($event)"
+    ></textarea>
+  </app-field>
+  <div class="foot">
+    <span>
+      Ctrl o ⌘ + Enter para enviar
+      @if (counter(); as text) {
+        · <span class="num">{{ text }}</span>
+      }
+    </span>
+    <button appButton variant="primary" type="submit" [loading]="busy()">Comentar</button>
+  </div>
+</form>
