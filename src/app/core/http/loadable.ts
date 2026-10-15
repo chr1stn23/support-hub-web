@@ -30,7 +30,7 @@ const lastValue = <T>(state: RemoteState<T>): T | null =>
  * anterior si todavía no terminó. Con params() = null no carga nada. Se llama en un contexto de inyección.
  */
 export function loadable<P, T>(
-  params: () => P | null,
+  params: () => P | false | null,
   load: (params: P) => Observable<T>,
 ): Loadable<T> {
   const tick = signal(0);
@@ -38,7 +38,7 @@ export function loadable<P, T>(
 
   const steps$ = toObservable(trigger).pipe(
     switchMap(({ params: p }): Observable<Step<T>> =>
-      p === null
+      p === null || p == false
         ? of({ status: 'idle' })
         : load(p).pipe(
             map((value): Step<T> => ({ status: 'success', value })),

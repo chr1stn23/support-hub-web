@@ -62,7 +62,16 @@ const DESCRIPTION_MAX = 5000;
 
         @if (triage) {
           <div class="pair">
-            <app-field label="Categoría" [error]="errorFor('categoryId')" [required]="true">
+            <app-field
+              label="Categoría"
+              [hint]="
+                categoriesFailed()
+                  ? 'No pudimos cargar las demás categorías. Cierra y vuelve a abrir para reintentar.'
+                  : null
+              "
+              [error]="errorFor('categoryId')"
+              [required]="true"
+            >
               <select
                 appControl
                 [formField]="form.categoryId"
@@ -170,9 +179,11 @@ export class EditTicketDialog {
   }));
 
   private readonly categories = loadable(
-    () => (this.triage ? true : null),
+    () => this.triage,
     () => this.catalog.categories(),
   );
+  protected readonly categoriesFailed = computed(() => this.categories.state().status === 'error');
+
   /** La categoría actual siempre está en la lista (aunque ya no esté activa), para que el selector la muestre desde el primer momento. */
   protected readonly categoryOptions = computed(() => {
     const loaded = this.categories.value() ?? [];

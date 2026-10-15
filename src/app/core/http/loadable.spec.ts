@@ -105,6 +105,17 @@ describe('loadable', () => {
     expect(requests[0].params).toBe(5);
   });
 
+  it('does not load while the parameters are false either', async () => {
+    const { params, requests, resource } = setup<true, string>(false as never);
+    await flush();
+    expect(requests).toHaveLength(0);
+    expect(resource.state().status).toBe('idle');
+
+    params.set(true);
+    await flush();
+    expect(requests).toHaveLength(1);
+  });
+
   it('works inside an injector of its own', () => {
     expect(Injector).toBeDefined();
   });
