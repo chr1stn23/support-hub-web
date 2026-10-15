@@ -1,5 +1,6 @@
 import { inject, Service } from '@angular/core';
 import {
+  ChangeStatusRequest,
   CreateTicketRequest,
   PageResponse,
   Ticket,
@@ -8,6 +9,7 @@ import {
   TicketPriority,
   TicketStatus,
   TicketSummary,
+  UpdateTicketRequest,
 } from '@core/api/models';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -66,5 +68,18 @@ export class TicketsApi {
   /** Tomar el ticket: el backend asigna a quien lo pide cuando no se indica un agente. */
   take(id: string): Observable<Ticket> {
     return this.http.post<Ticket>(`${API_BASE}/tickets/${id}/assign`, {});
+  }
+
+  changeStatus(id: string, request: ChangeStatusRequest): Observable<Ticket> {
+    return this.http.post<Ticket>(`${API_BASE}/tickets/${id}/status`, request);
+  }
+
+  /** Asignar a una persona concreta (solo administradores). */
+  assignTo(id: string, agentId: string): Observable<Ticket> {
+    return this.http.post<Ticket>(`${API_BASE}/tickets/${id}/assign`, { agentId });
+  }
+
+  update(id: string, request: UpdateTicketRequest): Observable<Ticket> {
+    return this.http.patch<Ticket>(`${API_BASE}/tickets/${id}`, request);
   }
 }

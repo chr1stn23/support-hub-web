@@ -4,8 +4,12 @@ import { TicketDetailPage } from '@features/tickets/ticket-detail-page';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
-import { ToastService } from '@shared/ui';
+import { DialogService, ToastService } from '@shared/ui';
 import { Title } from '@angular/platform-browser';
+import { StatusDialog } from '@features/tickets/status-dialog';
+import { AssignDialog } from '@features/tickets/assign-dialog';
+import { EditTicketDialog } from '@features/tickets/edit-ticket-dialog';
+import { of } from 'rxjs';
 
 const T = '/api/v1/tickets/t-1';
 
@@ -361,5 +365,72 @@ describe('TicketDetailPage', () => {
     http.expectOne('/api/v1/tickets/t-2/history').flush(history);
     await settle();
     expect(el().querySelector('h1')?.textContent).toBe('Otro');
+  });
+
+  describe('actions on the ticket', () => {
+    const withActions = (actions: Partial<Ticket['actions']>) =>
+      ticket({ actions: { ...ticket().actions, assignToSelf: false, ...actions } });
+    const button = (label: string) =>
+      Array.from(el().querySelectorAll('button')).find((b) => b.textContent?.trim() === label);
+
+    it('shows only the actions the server offers', async () => {
+      await setup(withActions({ editContent: false, editTriage: false, changeStatus: [] }));
+      expect(button('Cambiar estado')).toBeUndefined();
+      expect(button('Asignar a…')).toBeUndefined();
+      expect(button('Editar')).toBeUndefined();
+    });
+
+    it('shows them all to someone who may do everything', async () => {
+      await setup(
+        withActions({
+          assignToOthers: true,
+          changeStatus: [{ status: 'WAITING', noteRequired: false }],
+        }),
+      );
+      expect(button('Cambiar estado')).toBeTruthy();
+      expect(button('Asignar a…')).toBeTruthy();
+      expect(button('Editar')).toBeTruthy();
+    });
+
+    it.each([
+      ['Cambiar estado', StatusDialog],
+      ['Asignar a…', AssignDialog],
+      ['Editar', EditTicketDialog],
+    ] as const)(
+      '"%s" opens its dialog with the ticket, and reloads when the dialog says so',
+      async (label, component) => {
+        await setup(
+          withActions({
+            assignToOthers: true,
+            changeStatus: [{ status: 'WAITING', noteRequired: false }],
+          }),
+        );
+        const open = vi
+          .spyOn(TestBed.inject(DialogService), 'open')
+          .mockReturnValue({ closed: of(true) } as never);
+
+        button(label)!.click();
+        await settle();
+
+        expect(open).toHaveBeenCalledWith(
+          component,
+          expect.objectContaining({ data: { ticket: expect.objectContaining({ id: 't-1' }) } }),
+        );
+        http.expectOne(T).flush(ticket());
+        http.expectOne(`${T}/history`).flush(history);
+      },
+    );
+
+    it('does not reload when the dialog is cancelled', async () => {
+      await setup(withActions({ changeStatus: [{ status: 'WAITING', noteRequired: false }] }));
+      vi.spyOn(TestBed.inject(DialogService), 'open').mockReturnValue({
+        closed: of(false),
+      } as never);
+
+      button('Cambiar estado')!.click();
+      await settle();
+
+      http.expectNone(T);
+    });
   });
 });

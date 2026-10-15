@@ -29,6 +29,18 @@
           {{ takeLabel() }}
         </button>
       }
+      @if (t.actions.changeStatus.length > 0) {
+        <button appButton type="button" (click)="openStatus(t)">Cambiar estado</button>
+      }
+      @if (t.actions.assignToOthers) {
+        <button appButton type="button" (click)="openAssign(t)">Asignar a…</button>
+      }
+      @if (t.actions.editContent || t.actions.editTriage) {
+        <button appButton variant="ghost" type="button" (click)="openEdit(t)">
+          <app-icon name="pencil" [size]="14" />
+          Editar
+        </button>
+      }
     </div>
   </header>
 

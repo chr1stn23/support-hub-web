@@ -150,3 +150,24 @@ export interface DashboardSummary {
   };
   mine: { assignedOpen: number; resolvedInPeriod: number } | null;
 }
+
+// Acciones sobre tickets
+export interface UserLookup {
+  id: string;
+  fullName: string;
+  email: string;
+}
+
+export interface ChangeStatusRequest {
+  status: TicketStatus;
+  note?: string | null;
+}
+
+/** Solo viajan los campos que cambiaron; `version` es la que se leyó, para detectar ediciones simultáneas. */
+export interface UpdateTicketRequest {
+  version: number;
+  title?: string;
+  description?: string;
+  categoryId?: string;
+  priority?: TicketPriority;
+}

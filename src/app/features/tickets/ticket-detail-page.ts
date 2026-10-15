@@ -12,6 +12,7 @@ import {
   Avatar,
   Button,
   Chip,
+  DialogService,
   EmptyState,
   ErrorState,
   Icon,
@@ -27,6 +28,12 @@ import { Title } from '@angular/platform-browser';
 import { loadable } from '@core/http/loadable';
 import { firstValueFrom, map } from 'rxjs';
 import { describeError } from '@core/api/error-messages';
+import { Ticket } from '@core/api/models';
+import { StatusDialog } from '@features/tickets/status-dialog';
+import { AssignDialog } from '@features/tickets/assign-dialog';
+import { EditTicketDialog } from '@features/tickets/edit-ticket-dialog';
+import { ComponentType } from '@angular/cdk/portal';
+import { TicketDialogData } from '@features/tickets/ticket-dialog-data';
 
 @Component({
   selector: 'app-ticket-detail-page',
@@ -56,6 +63,8 @@ export class TicketDetailPage {
   private readonly api = inject(TicketsApi);
   private readonly toast = inject(ToastService);
   private readonly title = inject(Title);
+
+  private readonly dialogs = inject(DialogService);
 
   protected readonly ticket = loadable(
     () => this.id(),
@@ -100,6 +109,40 @@ export class TicketDetailPage {
   protected readonly takeLabel = computed(() =>
     this.view()?.agent ? 'Asignármelo' : 'Tomar ticket',
   );
+
+  protected openStatus(ticket: Ticket): Promise<void> {
+    return this.openDialog(StatusDialog, 'Cambiar estado', ticket);
+  }
+
+  protected openAssign(ticket: Ticket): Promise<void> {
+    return this.openDialog(AssignDialog, 'Asignar ticket', ticket);
+  }
+
+  protected openEdit(ticket: Ticket): Promise<void> {
+    return this.openDialog(
+      EditTicketDialog,
+      'Editar ticket',
+      ticket,
+      'min(36rem, calc(100vw - 2rem))',
+    );
+  }
+
+  /** Cada diálogo devuelve true cuando el ticket cambió (o dejó de ser lo que se veía): hay que recargar. */
+  private async openDialog<C>(
+    component: ComponentType<C>,
+    ariaLabel: string,
+    ticket: Ticket,
+    width?: string,
+  ): Promise<void> {
+    const ref = this.dialogs.open<C, boolean, TicketDialogData>(component, {
+      data: { ticket },
+      ariaLabel,
+      width,
+    });
+    if (await firstValueFrom(ref.closed, { defaultValue: false })) {
+      this.refreshTicket();
+    }
+  }
 
   constructor() {
     effect(() => {
