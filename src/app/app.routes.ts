@@ -83,7 +83,8 @@ export const routes: Routes = [
         path: 'activos/:id',
         canActivate: [roleGuard(...ACCESS.inventory)],
         title: 'Equipo',
-        loadComponent: placeholder,
+        loadComponent: () =>
+          import('./features/assets/asset-detail-page').then((m) => m.AssetDetailPage),
         data: { heading: 'Detalle del equipo' },
       },
       {

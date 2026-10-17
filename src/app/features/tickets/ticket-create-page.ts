@@ -22,6 +22,8 @@ import { PRIORITY_ORDER, TICKET_PRIORITY } from '@shared/domain';
 import { describeError, fieldErrorMessages } from '@core/api/error-messages';
 import { toApiError } from '@core/api/api-error';
 import { firstValueFrom } from 'rxjs';
+import { AssetsApi } from '@core/api/assets.api';
+import { AuthService } from '@core/auth/auth.service';
 
 const TITLE_MAX = 200;
 const DESCRIPTION_MIN = 10;
@@ -60,6 +62,9 @@ export class TicketCreatePage implements HasUnsavedChanges {
   private readonly toast = inject(ToastService);
   private readonly injector = inject(Injector);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly assetsApi = inject(AssetsApi);
+  private readonly auth = inject(AuthService);
+
   /** Llega de ?equipo=<id> (por ejemplo, desde "Mis equipos"). Solo se acepta si es uno de los de la persona. */
   readonly equipo = input<string>();
   private baselineAssetId = '';
@@ -95,14 +100,35 @@ export class TicketCreatePage implements HasUnsavedChanges {
     () => this.catalog.myAssets(),
   );
   protected readonly categoryOptions = computed(() => this.categories.value() ?? []);
-  protected readonly assetOptions = computed(() =>
-    (this.assets.value() ?? []).map((asset) => ({
-      id: asset.id,
-      label: [asset.assetTag, [asset.brand, asset.model].filter(Boolean).join(' ')]
-        .filter(Boolean)
-        .join(' · '),
-    })),
+
+  /** El personal de TI puede vincular cualquier equipo: si el de ?equipo= no es suyo, se consulta aparte. */
+  private readonly requestedOutsideMine = computed(() => {
+    const wanted = this.equipo();
+    const mine = this.assets.value();
+    const staff = this.auth.hasAnyRole(['ADMIN', 'ASSET_MANAGER', 'AGENT']);
+    return wanted && mine && staff && !mine.some((asset) => asset.id === wanted) ? wanted : null;
+  });
+  private readonly requested = loadable(
+    () => this.requestedOutsideMine(),
+    (id) => this.assetsApi.get(id),
   );
+
+  protected readonly assetOptions = computed(() => {
+    const label = (asset: { assetTag: string; brand: string | null; model: string | null }) =>
+      [asset.assetTag, [asset.brand, asset.model].filter(Boolean).join(' ')]
+        .filter(Boolean)
+        .join(' · ');
+
+    const options = (this.assets.value() ?? []).map((asset) => ({
+      id: asset.id,
+      label: label(asset),
+    }));
+    const extra = this.requested.value();
+    return extra && !options.some((option) => option.id === extra.id)
+      ? [...options, { id: extra.id, label: label(extra) }]
+      : options;
+  });
+
   protected readonly categoriesFailed = computed(() => this.categories.state().status === 'error');
   protected readonly priorityOptions = PRIORITY_ORDER.map((value) => ({
     value,

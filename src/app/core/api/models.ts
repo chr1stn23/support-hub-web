@@ -195,3 +195,60 @@ export interface DashboardAssetMetrics {
   byStatus: Partial<Record<AssetStatus, number>>;
   byType: { type: string; count: number }[];
 }
+
+// Detalle y acciones de equipos
+export interface AssetActions {
+  edit: boolean;
+  assign: boolean;
+  transfer: boolean;
+  returnAsset: boolean;
+  changeStatus: AssetStatus[];
+}
+
+export interface AssetDetail {
+  id: string;
+  assetTag: string;
+  type: AssetType;
+  brand: string;
+  model: string;
+  serialNumber: string | null;
+  status: AssetStatus;
+  location: string | null;
+  assignedTo: UserSummary | null;
+  assignedSince: string | null;
+  createdAt: string;
+  updatedAt: string;
+  version: number;
+  actions: AssetActions;
+}
+
+export interface AssetAssignment {
+  id: string;
+  user: UserSummary;
+  assignedBy: UserSummary;
+  assignedAt: string;
+  returnedAt: string | null;
+  notes: string | null;
+}
+
+export interface CreateAssetRequest {
+  assetTypeId: string;
+  brand: string;
+  model: string;
+  serialNumber?: string | null;
+  location?: string | null;
+}
+
+export interface UpdateAssetRequest {
+  version: number;
+  assetTypeId?: string;
+  brand?: string;
+  model?: string;
+  serialNumber?: string;
+  location?: string;
+}
+
+export interface AssignAssetRequest {
+  userId: string;
+  notes?: string | null;
+}

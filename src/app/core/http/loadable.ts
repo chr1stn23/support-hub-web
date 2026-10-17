@@ -38,7 +38,7 @@ export function loadable<P, T>(
 
   const steps$ = toObservable(trigger).pipe(
     switchMap(({ params: p }): Observable<Step<T>> =>
-      p === null || p == false
+      p === null || p === false
         ? of({ status: 'idle' })
         : load(p).pipe(
             map((value): Step<T> => ({ status: 'success', value })),

@@ -1,0 +1,171 @@
+<a class="back" routerLink="/activos">
+  <app-icon name="chevron-left" [size]="14" />
+  Inventario
+</a>
+
+@if (notFound()) {
+  <app-empty-state
+    icon="search"
+    title="No encontramos este equipo"
+    description="Puede que ya no exista o que la dirección esté mal escrita."
+  >
+    <a appButton variant="primary" routerLink="/activos">Volver al inventario</a>
+  </app-empty-state>
+} @else if (assetError(); as failure) {
+  <app-error-state [error]="failure" title="No pudimos cargar el equipo" (retry)="reloadAll()" />
+} @else if (view(); as a) {
+  <header class="head">
+    <div class="head__text">
+      <p class="code mono">{{ a.assetTag }}</p>
+      <h1>{{ displayTitle() }}</h1>
+      <div class="badges">
+        <app-asset-status [status]="a.status" />
+        <span class="kind">{{ a.type.name }}</span>
+      </div>
+    </div>
+
+    <div class="head__actions">
+      @if (a.actions.assign) {
+        <button appButton variant="primary" type="button" (click)="openAssign(a)">Asignar</button>
+      }
+      @if (a.actions.transfer) {
+        <button appButton variant="primary" type="button" (click)="openTransfer(a)">Transferir</button>
+      }
+      @if (a.actions.returnAsset) {
+        <button appButton type="button" [loading]="returning()" (click)="returnAsset(a)">Registrar devolución</button>
+      }
+      @if (a.actions.changeStatus.length > 0) {
+        <button appButton type="button" (click)="openStatus(a)">Cambiar estado</button>
+      }
+      @if (a.actions.edit) {
+        <button appButton variant="ghost" type="button" (click)="openEdit(a)">
+          <app-icon name="pencil" [size]="14" />
+          Editar
+        </button>
+      }
+      <a appButton variant="ghost" routerLink="/tickets/nuevo" [queryParams]="{ equipo: a.id }">Crear ticket</a>
+    </div>
+  </header>
+
+  <div class="layout">
+    <div class="main">
+      <section class="block" aria-labelledby="assignments-title">
+        <h2 id="assignments-title">
+          Historial de asignaciones
+          @if (assignmentList(); as list) {
+            <span class="count num">{{ list.length }}</span>
+          }
+        </h2>
+        @if (assignmentsFailed()) {
+          <app-error-state title="No pudimos cargar el historial" (retry)="assignments.reload()" />
+        } @else if (assignmentList(); as list) {
+          <app-assignment-timeline [assignments]="list" />
+        } @else {
+          <app-skeleton [lines]="3" />
+        }
+      </section>
+
+      <section class="block" aria-labelledby="tickets-title">
+        <h2 id="tickets-title">
+          Tickets relacionados
+          @if (ticketList(); as list) {
+            <span class="count num">{{ list.length }}</span>
+          }
+        </h2>
+        @if (ticketsFailed()) {
+          <app-error-state title="No pudimos cargar los tickets" (retry)="tickets.reload()" />
+        } @else if (ticketList(); as list) {
+          @if (list.length === 0) {
+            <p class="muted">Ningún ticket menciona este equipo.</p>
+          } @else {
+            <ul class="tickets">
+              @for (ticket of list; track ticket.id) {
+                <li class="ticket">
+                  <a class="ticket__title" [routerLink]="['/tickets', ticket.id]">
+                    <span class="mono code">{{ ticket.ticketCode }}</span>
+                    {{ ticket.title }}
+                  </a>
+                  <span class="ticket__meta">
+                    <app-ticket-status [status]="ticket.status" />
+                    <app-priority [priority]="ticket.priority" />
+                    <app-time [value]="ticket.createdAt" />
+                  </span>
+                </li>
+              }
+            </ul>
+            @if (list.length >= 25) {
+              <p class="muted">Se muestran los 25 más recientes.</p>
+            }
+          }
+        } @else {
+          <app-skeleton [lines]="3" />
+        }
+      </section>
+    </div>
+
+    <aside class="side" aria-label="Detalles del equipo">
+      <dl class="details">
+        <div class="row">
+          <dt>Responsable</dt>
+          <dd>
+            @if (a.assignedTo; as holder) {
+              <span class="person">
+                <app-avatar [name]="holder.fullName" size="sm" />
+                {{ holder.fullName }}
+              </span>
+              @if (a.assignedSince; as since) {
+                <span class="since">desde <app-time [value]="since" /></span>
+              }
+            } @else {
+              <span class="muted">Sin asignar</span>
+            }
+          </dd>
+        </div>
+        <div class="row">
+          <dt>Tipo</dt>
+          <dd>{{ a.type.name }}</dd>
+        </div>
+        <div class="row">
+          <dt>Marca</dt>
+          <dd>{{ a.brand }}</dd>
+        </div>
+        <div class="row">
+          <dt>Modelo</dt>
+          <dd>{{ a.model }}</dd>
+        </div>
+        <div class="row">
+          <dt>Número de serie</dt>
+          <dd>
+            @if (a.serialNumber; as serial) {
+              <span class="mono">{{ serial }}</span>
+            } @else {
+              <span class="muted">—</span>
+            }
+          </dd>
+        </div>
+        <div class="row">
+          <dt>Ubicación</dt>
+          <dd>{{ a.location ?? '—' }}</dd>
+        </div>
+        <div class="row">
+          <dt>Registrado</dt>
+          <dd>
+            <app-time [value]="a.createdAt" />
+          </dd>
+        </div>
+        <div class="row">
+          <dt>Actualizado</dt>
+          <dd>
+            <app-time [value]="a.updatedAt" />
+          </dd>
+        </div>
+      </dl>
+    </aside>
+  </div>
+} @else {
+  <div role="status" aria-label="Cargando el equipo" class="loading">
+    <app-skeleton width="8rem" />
+    <app-skeleton width="60%" height="1.75rem" />
+    <app-skeleton [lines]="4" />
+  </div>
+}

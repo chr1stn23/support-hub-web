@@ -14,3 +14,4 @@ export {
 } from './labels';
 export { PriorityBadge } from './priority-badge';
 export { TicketStatusChip } from './ticket-status-chip';
+export { PersonPicker } from './person-picker';

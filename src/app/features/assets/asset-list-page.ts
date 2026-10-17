@@ -11,6 +11,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import {
   Avatar,
   Button,
+  DialogService,
   EmptyState,
   ErrorState,
   Icon,
@@ -37,7 +38,11 @@ import {
 import { ASSET_SIZE_OPTIONS } from '@features/assets/asset-query';
 import { loadable } from '@core/http/loadable';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
-import { debounceTime, distinctUntilChanged, skip } from 'rxjs';
+import { debounceTime, distinctUntilChanged, firstValueFrom, skip } from 'rxjs';
+import { AuthService } from '@core/auth/auth.service';
+import { ACCESS } from '@core/auth/access';
+import { AssetFormDialog } from '@features/assets/asset-form-dialog';
+import { AssetFormData } from '@features/assets/asset-dialog-data';
 
 const SEARCH_DEBOUNCE_MS = 300;
 
@@ -72,6 +77,10 @@ export class AssetListPage {
   private readonly route = inject(ActivatedRoute);
   private readonly api = inject(AssetsApi);
   private readonly catalog = inject(CatalogApi);
+  private readonly auth = inject(AuthService);
+  private readonly dialogs = inject(DialogService);
+
+  protected readonly canCreate = computed(() => this.auth.hasAnyRole([...ACCESS.assetManagement]));
 
   protected readonly views = ASSET_VIEWS;
   protected readonly sizeOptions = ASSET_SIZE_OPTIONS;
@@ -182,5 +191,22 @@ export class AssetListPage {
       relativeTo: this.route,
       queryParams: toAssetUrlParams({ ...this.state(), ...patch }),
     });
+  }
+
+  protected async openCreate(): Promise<void> {
+    const ref = this.dialogs.open<AssetFormDialog, string | boolean, AssetFormData>(
+      AssetFormDialog,
+      {
+        data: {},
+        ariaLabel: 'Nuevo equipo',
+        width: 'min(36rem, calc(100vw - 2rem))',
+      },
+    );
+    const result = await firstValueFrom(ref.closed, { defaultValue: false });
+    if (typeof result === 'string') {
+      void this.router.navigate(['/activos', result]); // el diálogo devuelve el id del equipo creado
+    } else if (result) {
+      this.reload();
+    }
   }
 }

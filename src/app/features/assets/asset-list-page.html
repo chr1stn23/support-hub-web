@@ -1,4 +1,11 @@
-<app-page-header title="Inventario" description="Equipos de la organización y quién los tiene." />
+<app-page-header title="Inventario" description="Equipos de la organización y quién los tiene.">
+  @if (canCreate()) {
+    <button appButton variant="primary" type="button" (click)="openCreate()">
+      <app-icon name="plus" [size]="14" />
+      Nuevo equipo
+    </button>
+  }
+</app-page-header>
 
 <nav class="link-tabs" aria-label="Estados de los equipos">
   @for (view of views; track view.id) {

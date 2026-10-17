@@ -57,4 +57,68 @@ describe('AssetsApi', () => {
     http.expectOne('/api/v1/asset-types').flush([{ id: 't-1', name: 'Laptop' }]);
     expect(result).toEqual([{ id: 't-1', name: 'Laptop' }]);
   });
+
+  it('reads one equipment, its assignments and its related tickets', () => {
+    api.get('a-1').subscribe();
+    http.expectOne('/api/v1/assets/a-1').flush({});
+    api.assignments('a-1').subscribe();
+    http.expectOne('/api/v1/assets/a-1/assignments').flush([]);
+    api.relatedTickets('a-1').subscribe();
+    http.expectOne('/api/v1/assets/a-1/tickets').flush([]);
+  });
+
+  it('registers an equipment', () => {
+    api
+      .create({
+        assetTypeId: 't-1',
+        brand: 'Dell',
+        model: 'XPS',
+        serialNumber: null,
+        location: null,
+      })
+      .subscribe();
+    const request = http.expectOne('/api/v1/assets');
+    expect(request.request.method).toBe('POST');
+    expect(request.request.body).toEqual({
+      assetTypeId: 't-1',
+      brand: 'Dell',
+      model: 'XPS',
+      serialNumber: null,
+      location: null,
+    });
+    request.flush({});
+  });
+
+  it('edits with PATCH and the version that was read', () => {
+    api.update('a-1', { version: 4, location: '' }).subscribe();
+    const request = http.expectOne('/api/v1/assets/a-1');
+    expect(request.request.method).toBe('PATCH');
+    expect(request.request.body).toEqual({ version: 4, location: '' });
+    request.flush({});
+  });
+
+  it('assigns and transfers with the person and the note', () => {
+    api.assign('a-1', { userId: 'u-2', notes: 'Para el trabajo remoto' }).subscribe();
+    const assign = http.expectOne('/api/v1/assets/a-1/assign');
+    expect(assign.request.body).toEqual({ userId: 'u-2', notes: 'Para el trabajo remoto' });
+    assign.flush({});
+
+    api.transfer('a-1', { userId: 'u-3', notes: null }).subscribe();
+    const transfer = http.expectOne('/api/v1/assets/a-1/transfer');
+    expect(transfer.request.body).toEqual({ userId: 'u-3', notes: null });
+    transfer.flush({});
+  });
+
+  it('returns an equipment with an empty body, and changes its status', () => {
+    api.returnAsset('a-1').subscribe();
+    const returned = http.expectOne('/api/v1/assets/a-1/return');
+    expect(returned.request.method).toBe('POST');
+    expect(returned.request.body).toEqual({});
+    returned.flush({});
+
+    api.changeStatus('a-1', 'MAINTENANCE').subscribe();
+    const status = http.expectOne('/api/v1/assets/a-1/status');
+    expect(status.request.body).toEqual({ status: 'MAINTENANCE' });
+    status.flush({});
+  });
 });

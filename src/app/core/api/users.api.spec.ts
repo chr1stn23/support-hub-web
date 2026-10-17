@@ -63,4 +63,20 @@ describe('UsersApi', () => {
 
     expect(result).toEqual(['Ana Admin', 'Carlos Agente']);
   });
+
+  it('searches any active person, with no role filter', () => {
+    api.searchPeople('ana').subscribe();
+    const request = http.expectOne((r) => r.url === '/api/v1/users/lookup');
+    expect(request.request.params.get('search')).toBe('ana');
+    expect(request.request.params.get('size')).toBe('20');
+    expect(request.request.params.has('role')).toBe(false);
+    request.flush(page());
+  });
+
+  it('sends no search text when it is empty', () => {
+    api.searchPeople('').subscribe();
+    const request = http.expectOne((r) => r.url === '/api/v1/users/lookup');
+    expect(request.request.params.has('search')).toBe(false);
+    request.flush(page());
+  });
 });

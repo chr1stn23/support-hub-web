@@ -36,4 +36,13 @@ export class UsersApi {
       map(([agents, admins]) => mergeSorted(agents, admins)),
     );
   }
+
+  /** Cualquier persona activa, por nombre o correo, sin filtrar por rol. Hasta `size` resultados. */
+  searchPeople(search: string, size = 20): Observable<PageResponse<UserLookup>> {
+    let params = new HttpParams().set('size', size);
+    if (search) {
+      params = params.set('search', search);
+    }
+    return this.http.get<PageResponse<UserLookup>>(`${API_BASE}/users/lookup`, { params });
+  }
 }

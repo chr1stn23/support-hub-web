@@ -1,4 +1,15 @@
-import { AssetListItem, AssetStatus, AssetType, PageResponse } from '@core/api/models';
+import {
+  AssetAssignment,
+  AssetDetail,
+  AssetListItem,
+  AssetStatus,
+  AssetType,
+  AssignAssetRequest,
+  CreateAssetRequest,
+  PageResponse,
+  TicketSummary,
+  UpdateAssetRequest,
+} from '@core/api/models';
 import { inject, Service } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -17,6 +28,10 @@ export interface AssetListQuery {
 export class AssetsApi {
   private readonly http = inject(HttpClient);
 
+  private url(id: string): string {
+    return `${API_BASE}/assets/${id}`;
+  }
+
   list(query: AssetListQuery): Observable<PageResponse<AssetListItem>> {
     let params = new HttpParams()
       .set('page', query.page)
@@ -30,5 +45,43 @@ export class AssetsApi {
 
   types(): Observable<AssetType[]> {
     return this.http.get<AssetType[]>(`${API_BASE}/asset-types`);
+  }
+
+  get(id: string): Observable<AssetDetail> {
+    return this.http.get<AssetDetail>(this.url(id));
+  }
+
+  /** Del más reciente al más antiguo. */
+  assignments(id: string): Observable<AssetAssignment[]> {
+    return this.http.get<AssetAssignment[]>(`${this.url(id)}/assignments`);
+  }
+
+  /** Hasta 25 tickets que mencionan el equipo, los más recientes. */
+  relatedTickets(id: string): Observable<TicketSummary[]> {
+    return this.http.get<TicketSummary[]>(`${this.url(id)}/tickets`);
+  }
+
+  create(request: CreateAssetRequest): Observable<AssetDetail> {
+    return this.http.post<AssetDetail>(`${API_BASE}/assets`, request);
+  }
+
+  update(id: string, request: UpdateAssetRequest): Observable<AssetDetail> {
+    return this.http.patch<AssetDetail>(this.url(id), request);
+  }
+
+  assign(id: string, request: AssignAssetRequest): Observable<AssetDetail> {
+    return this.http.post<AssetDetail>(`${this.url(id)}/assign`, request);
+  }
+
+  transfer(id: string, request: AssignAssetRequest): Observable<AssetDetail> {
+    return this.http.post<AssetDetail>(`${this.url(id)}/transfer`, request);
+  }
+
+  returnAsset(id: string): Observable<AssetDetail> {
+    return this.http.post<AssetDetail>(`${this.url(id)}/return`, {});
+  }
+
+  changeStatus(id: string, status: AssetStatus): Observable<AssetDetail> {
+    return this.http.post<AssetDetail>(`${this.url(id)}/status`, { status });
   }
 }
