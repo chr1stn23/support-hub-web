@@ -65,14 +65,15 @@ export const routes: Routes = [
       {
         path: 'mis-equipos',
         title: 'Mis equipos',
-        loadComponent: placeholder,
+        loadComponent: () => import('./features/assets/my-assets-page').then((m) => m.MyAssetsPage),
         data: { heading: 'Mis equipos', description: 'Los equipos que tienes asignados.' },
       },
       {
         path: 'activos',
         canActivate: [roleGuard(...ACCESS.inventory)],
         title: 'Inventario',
-        loadComponent: placeholder,
+        loadComponent: () =>
+          import('./features/assets/asset-list-page').then((m) => m.AssetListPage),
         data: {
           heading: 'Inventario',
           description: 'Equipos de la organización y quién los tiene.',

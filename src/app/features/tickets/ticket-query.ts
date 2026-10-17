@@ -1,6 +1,7 @@
 import { parseSort, SortState, toSortParam } from '@shared/ui';
 import { DashboardSummary, TicketPriority, TicketStatus } from '@core/api/models';
 import { TicketListQuery } from '@core/api/tickets.api';
+import { isUuid, positiveInt } from '@shared/util/list-params';
 
 export type TicketView =
   'abiertos' | 'sin-asignar' | 'mios' | 'prioridad-alta' | 'resueltos' | 'todos';
@@ -59,12 +60,6 @@ export interface RawListParams {
   orden?: string;
 }
 
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-
-function positiveInt(value: string | undefined, fallback: number): number {
-  return value !== undefined && /^\d+$/.test(value) && Number(value) > 0 ? Number(value) : fallback;
-}
-
 /** Convierte lo que haya en la URL en un estado válido; lo que no entiende, lo ignora. */
 export function parseListState(raw: RawListParams, canViewAll: boolean): ListState {
   const allowed = viewsFor(canViewAll);
@@ -76,7 +71,7 @@ export function parseListState(raw: RawListParams, canViewAll: boolean): ListSta
   return {
     view,
     search: (raw.buscar ?? '').trim().slice(0, MAX_SEARCH_LENGTH),
-    categoryId: raw.categoria && UUID.test(raw.categoria) ? raw.categoria : '',
+    categoryId: isUuid(raw.categoria) ? raw.categoria : '',
     priority: PRIORITIES.find((p) => p === raw.prioridad) ?? '',
     page: positiveInt(raw.pagina, 1) - 1,
     size: SIZE_OPTIONS.includes(size) ? size : DEFAULT_SIZE,

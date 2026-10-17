@@ -3,9 +3,11 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  effect,
   ElementRef,
   inject,
   Injector,
+  input,
   signal,
 } from '@angular/core';
 import { TicketPriority } from '@core/api/models';
@@ -58,6 +60,31 @@ export class TicketCreatePage implements HasUnsavedChanges {
   private readonly toast = inject(ToastService);
   private readonly injector = inject(Injector);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+  /** Llega de ?equipo=<id> (por ejemplo, desde "Mis equipos"). Solo se acepta si es uno de los de la persona. */
+  readonly equipo = input<string>();
+  private baselineAssetId = '';
+  private preselected = false;
+
+  constructor() {
+    effect(() => {
+      const wanted = this.equipo();
+      if (
+        this.preselected ||
+        !wanted ||
+        !this.assetOptions().some((option) => option.id === wanted)
+      ) {
+        return;
+      }
+      this.preselected = true;
+      afterNextRender(
+        () => {
+          this.baselineAssetId = wanted;
+          this.model.update((m) => ({ ...m, assetId: wanted }));
+        },
+        { injector: this.injector },
+      );
+    });
+  }
 
   protected readonly categories = loadable(
     () => true,
@@ -136,7 +163,7 @@ export class TicketCreatePage implements HasUnsavedChanges {
       m.title.trim() !== '' ||
       m.description.trim() !== '' ||
       m.categoryId !== '' ||
-      m.assetId !== '' ||
+      m.assetId !== this.baselineAssetId ||
       m.priority !== INITIAL.priority
     );
   }

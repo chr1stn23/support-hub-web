@@ -1,0 +1,54 @@
+<app-page-header title="Mis equipos" [description]="description()" />
+
+@if (error(); as failure) {
+  <app-error-state [error]="failure" title="No pudimos cargar tus equipos" (retry)="assets.reload()" />
+} @else if (items(); as list) {
+  @if (list.length === 0) {
+    <app-empty-state
+      icon="laptop"
+      title="No tienes equipos asignados"
+      description="Si necesitas uno, crea un ticket de solicitud y te ayudaremos."
+    >
+      <a appButton variant="primary" routerLink="/tickets/nuevo">
+        <app-icon name="plus" [size]="14" />
+        Crear un ticket
+      </a>
+    </app-empty-state>
+  } @else {
+    <ul class="cards">
+      @for (asset of list; track asset.id) {
+        <li class="card">
+          <div class="card__head">
+            <span class="kind">
+              <app-icon name="laptop" [size]="16" />
+              {{ asset.type }}
+            </span>
+            <app-asset-status [status]="asset.status" />
+          </div>
+          <h2 class="card__title">{{ title(asset) }}</h2>
+          <dl class="facts">
+            <div>
+              <dt>Etiqueta</dt>
+              <dd class="mono">{{ asset.assetTag }}</dd>
+            </div>
+            <div>
+              <dt>Ubicación</dt>
+              <dd>{{ asset.location ?? '—' }}</dd>
+            </div>
+          </dl>
+          <a appButton size="sm" routerLink="/tickets/nuevo" [queryParams]="{ equipo: asset.id }">
+            Reportar un problema
+          </a>
+        </li>
+      }
+    </ul>
+  }
+} @else {
+  <div class="cards" role="status" aria-label="Cargando tus equipos">
+    @for (placeholder of [1, 2, 3]; track placeholder) {
+      <div class="card">
+        <app-skeleton [lines]="3" />
+      </div>
+    }
+  </div>
+}

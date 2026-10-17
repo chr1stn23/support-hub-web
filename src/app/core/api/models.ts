@@ -149,6 +149,7 @@ export interface DashboardSummary {
     byStatus: Record<TicketStatus, number>;
   };
   mine: { assignedOpen: number; resolvedInPeriod: number } | null;
+  assets?: DashboardAssetMetrics | null;
 }
 
 // Acciones sobre tickets
@@ -181,4 +182,16 @@ export interface Attachment {
   createdAt: string;
   /** Lo decide el servidor: quien lo subió, el agente asignado o un administrador, con el ticket abierto. */
   canDelete: boolean;
+}
+
+export interface AssetType {
+  id: string;
+  name: string;
+}
+
+export interface DashboardAssetMetrics {
+  total: number;
+  /** Puede faltar un estado sin equipos: quien lo lea debe tratarlo como 0. */
+  byStatus: Partial<Record<AssetStatus, number>>;
+  byType: { type: string; count: number }[];
 }

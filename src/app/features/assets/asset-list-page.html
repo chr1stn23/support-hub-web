@@ -1,0 +1,135 @@
+<app-page-header title="Inventario" description="Equipos de la organización y quién los tiene." />
+
+<nav class="link-tabs" aria-label="Estados de los equipos">
+  @for (view of views; track view.id) {
+    @let count = countOf(view.id);
+    <a
+      class="link-tab"
+      [routerLink]="[]"
+      [queryParams]="tabParams(view.id)"
+      [class.is-active]="state().view === view.id"
+      [attr.aria-current]="state().view === view.id ? 'page' : null"
+    >
+      {{ view.label }}
+      @if (count !== null) {
+        <span class="link-tab__count num">{{ count }}</span>
+      }
+    </a>
+  }
+</nav>
+
+<div class="filters" role="search">
+  <div class="search">
+    <app-icon name="search" [size]="16" />
+    <input
+      class="control"
+      type="search"
+      aria-label="Buscar equipos"
+      placeholder="Buscar por etiqueta, marca, modelo, serie o ubicación"
+      maxlength="100"
+      [value]="searchDraft()"
+      (input)="searchDraft.set($any($event.target).value)"
+    />
+  </div>
+
+  <select class="control" aria-label="Filtrar por tipo" (change)="setType($event)">
+    <option value="" [selected]="state().typeId === ''">Todos los tipos</option>
+    @for (type of typeOptions(); track type.id) {
+      <option [value]="type.id" [selected]="type.id === state().typeId">{{ type.name }}</option>
+    }
+  </select>
+
+  @if (hasFilters()) {
+    <button appButton variant="ghost" type="button" (click)="clearFilters()">
+      <app-icon name="x" [size]="14" />
+      Limpiar filtros
+    </button>
+  }
+</div>
+
+<p class="sr-only" aria-live="polite">{{ announcement() }}</p>
+
+@if (error(); as failure) {
+  <app-error-state [error]="failure" title="No pudimos cargar los equipos" (retry)="reload()" />
+} @else if (page(); as data) {
+  @if (data.content.length === 0) {
+    @if (hasFilters()) {
+      <app-empty-state
+        icon="search"
+        title="Ningún equipo coincide con tu búsqueda"
+        description="Prueba con otras palabras o quita algún filtro."
+      >
+        <button appButton type="button" (click)="clearFilters()">Limpiar filtros</button>
+      </app-empty-state>
+    } @else {
+      <app-empty-state
+        icon="box"
+        title="No hay equipos en esta vista"
+        description="Cuando haya equipos que coincidan, aparecerán aquí."
+      />
+    }
+  } @else {
+    <div class="table-wrap" [class.is-stale]="loading()" [attr.aria-busy]="loading() ? 'true' : null">
+      <table class="table">
+        <caption class="sr-only">
+          Inventario de equipos
+        </caption>
+        <thead>
+        <tr>
+          <th appSortHeader="assetTag" [sort]="state().sort" (sortChange)="onSort($event)">Etiqueta</th>
+          <th>Tipo</th>
+          <th appSortHeader="brand" [sort]="state().sort" (sortChange)="onSort($event)">Marca</th>
+          <th appSortHeader="model" [sort]="state().sort" (sortChange)="onSort($event)">Modelo</th>
+          <th>Estado</th>
+          <th>Responsable</th>
+          <th>Ubicación</th>
+        </tr>
+        </thead>
+        <tbody>
+          @for (asset of data.content; track asset.id) {
+            <tr>
+              <td class="cell-code">
+                <a [routerLink]="['/activos', asset.id]">{{ asset.assetTag }}</a>
+              </td>
+              <td>{{ asset.type }}</td>
+              <td>{{ asset.brand ?? '—' }}</td>
+              <td class="cell-wrap">{{ asset.model ?? '—' }}</td>
+              <td>
+                <app-asset-status [status]="asset.status" />
+              </td>
+              <td>
+                @if (asset.assignedTo; as holder) {
+                  <span class="person">
+                    <app-avatar [name]="holder.fullName" size="sm" />
+                    {{ holder.fullName }}
+                  </span>
+                } @else {
+                  <span class="muted">—</span>
+                }
+              </td>
+              <td>{{ asset.location ?? '—' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <app-pagination
+      class="pager"
+      [page]="state().page"
+      [size]="state().size"
+      [totalElements]="data.totalElements"
+      [sizeOptions]="sizeOptions"
+      (pageChange)="onPage($event)"
+      (sizeChange)="onSize($event)"
+    />
+  }
+} @else {
+  <div class="table-wrap loading" role="status" aria-label="Cargando equipos">
+    <div class="loading__rows">
+      @for (row of [1, 2, 3, 4, 5, 6]; track row) {
+        <app-skeleton height="1rem" />
+      }
+    </div>
+  </div>
+}
