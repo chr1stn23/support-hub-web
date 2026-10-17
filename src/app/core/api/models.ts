@@ -171,3 +171,14 @@ export interface UpdateTicketRequest {
   categoryId?: string;
   priority?: TicketPriority;
 }
+
+export interface Attachment {
+  id: string;
+  filename: string;
+  contentType: string;
+  sizeBytes: number;
+  uploadedBy: UserSummary;
+  createdAt: string;
+  /** Lo decide el servidor: quien lo subió, el agente asignado o un administrador, con el ticket abierto. */
+  canDelete: boolean;
+}

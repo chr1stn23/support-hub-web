@@ -97,6 +97,9 @@ export const ICONS = {
   ],
   'clipboard-list': [rect(6, 4, 12, 17, 2), path('M9 4h6v3H9Z'), path('M9 12h6'), path('M9 16h6')],
   box: [path('M3 7.5 12 3l9 4.5v9L12 21l-9-4.5v-9Z'), path('M3 7.5 12 12l9-4.5'), path('M12 12v9')],
+  file: [path('M7 3h7l5 5v13H7V3Z'), path('M14 3v5h5')],
+  'file-text': [path('M7 3h7l5 5v13H7V3Z'), path('M14 3v5h5'), path('M10 13h6'), path('M10 17h6')],
+  image: [rect(4, 5, 16, 14, 2), circle(9, 10, 1.5), path('m5 17 4.5-4.5 3.5 3.5 2-2L20 17')],
 } as const satisfies Record<string, readonly Shape[]>;
 
 export type IconName = keyof typeof ICONS;

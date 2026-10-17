@@ -34,6 +34,7 @@ import { AssignDialog } from '@features/tickets/assign-dialog';
 import { EditTicketDialog } from '@features/tickets/edit-ticket-dialog';
 import { ComponentType } from '@angular/cdk/portal';
 import { TicketDialogData } from '@features/tickets/ticket-dialog-data';
+import { AttachmentsSection } from '@features/tickets/attachments-section';
 
 @Component({
   selector: 'app-ticket-detail-page',
@@ -51,6 +52,7 @@ import { TicketDialogData } from '@features/tickets/ticket-dialog-data';
     PriorityBadge,
     CommentForm,
     HistoryTimeline,
+    AttachmentsSection,
   ],
   templateUrl: './ticket-detail-page.html',
   styleUrl: './ticket-detail-page.scss',

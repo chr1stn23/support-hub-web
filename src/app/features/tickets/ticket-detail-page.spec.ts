@@ -111,6 +111,8 @@ describe('TicketDetailPage', () => {
     http.expectOne(`${T}/comments`).flush(comments);
     http.expectOne(`${T}/history`).flush(history);
     await settle();
+    http.expectOne(`${T}/attachments`).flush([]);
+    await settle();
   }
 
   afterEach(() => TestBed.inject(ToastService).clear());
@@ -165,6 +167,12 @@ describe('TicketDetailPage', () => {
     );
     expect(items[0]).toContain('Carlos Agente tomó el ticket');
     expect(items[1]).toContain('Lucía Usuaria creó el ticket');
+  });
+
+  it('shows the attachments section, with the upload area only when the ticket allows it', async () => {
+    await setup();
+    expect(el().querySelector('app-attachments-section')).not.toBeNull();
+    expect(el().querySelector('.drop')).not.toBeNull();
   });
 
   it('offers "Tomar ticket" when the server says it can be taken', async () => {

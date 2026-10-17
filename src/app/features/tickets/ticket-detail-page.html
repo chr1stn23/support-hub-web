@@ -51,6 +51,8 @@
         <p class="text">{{ t.description }}</p>
       </section>
 
+      <app-attachments-section [ticketId]="t.id" [canAttach]="t.actions.attach" (locked)="refreshTicket()" />
+
       <section class="block" aria-labelledby="comments-title">
         <h2 id="comments-title">
           Comentarios

@@ -1,8 +1,13 @@
 import { ApiError } from '@core/api/api-error';
 import { LoginResponse } from '../api/models';
-import { HttpClient, provideHttpClient, withInterceptors, withXsrfConfiguration } from '@angular/common/http';
+import {
+  HttpClient,
+  provideHttpClient,
+  withInterceptors,
+  withXsrfConfiguration,
+} from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { sessionInterceptor} from './session.interceptor';
+import { sessionInterceptor } from './session.interceptor';
 import { errorInterceptor } from './error.interceptor';
 import { AuthService } from './auth.service';
 import { TestBed } from '@angular/core/testing';
@@ -237,6 +242,55 @@ describe('HTTP interceptors', () => {
       request.flush({});
     });
   });
+
+  describe('errors that arrive as a Blob (downloads)', () => {
+    const blobOf = (body: unknown) =>
+      new Blob([typeof body === 'string' ? body : JSON.stringify(body)], {
+        type: 'application/json',
+      });
+
+    it('reads the JSON inside the blob and gives the caller a normal ApiError', async () => {
+      let caught: unknown;
+      http
+        .get('/api/v1/tickets/t-1/attachments/f-1/download', { responseType: 'blob' })
+        .subscribe({ error: (e: unknown) => (caught = e) });
+
+      backend
+        .expectOne('/api/v1/tickets/t-1/attachments/f-1/download')
+        .flush(blobOf(errorBody(404, 'RESOURCE_NOT_FOUND')), {
+          status: 404,
+          statusText: 'Not Found',
+        });
+      await settle();
+
+      expect(caught).toMatchObject({ status: 404, code: 'RESOURCE_NOT_FOUND' });
+    });
+
+    it('falls back to the HTTP status when the blob is not JSON', async () => {
+      let caught: unknown;
+      http
+        .get('/api/v1/x', { responseType: 'blob' })
+        .subscribe({ error: (e: unknown) => (caught = e) });
+
+      backend
+        .expectOne('/api/v1/x')
+        .flush(blobOf('<html>Bad gateway</html>'), { status: 502, statusText: 'Bad Gateway' });
+      await settle();
+
+      expect(caught).toMatchObject({ status: 502, code: 'INTERNAL_ERROR' });
+    });
+
+    it('still renews the session on a 401 inside a blob', async () => {
+      signIn();
+      let result: unknown;
+      http.get('/api/v1/x', { responseType: 'blob' }).subscribe((value) => (result = value));
+
+      backend.expectOne('/api/v1/x').flush(blobOf(errorBody(401, 'UNAUTHORIZED')), unauthorized);
+      backend.expectOne('/api/v1/auth/refresh').flush(loginResponse);
+      await settle();
+      backend.expectOne('/api/v1/x').flush(new Blob(['ok']));
+
+      expect(result).toBeInstanceOf(Blob);
+    });
+  });
 });
-
-

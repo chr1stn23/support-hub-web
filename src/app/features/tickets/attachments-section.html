@@ -1,0 +1,159 @@
+<h2 id="attachments-title">
+  Adjuntos
+  @if (files(); as list) {
+    <span class="count num">{{ list.length }}</span>
+  }
+</h2>
+
+<p class="sr-only" aria-live="polite">{{ announcement() }}</p>
+
+@if (canAttach()) {
+  <div
+    class="drop"
+    [class.is-dragging]="dragging()"
+    (dragenter)="onDrag($event)"
+    (dragover)="onDrag($event)"
+    (dragleave)="onLeave($event)"
+    (drop)="onDrop($event)"
+  >
+    <app-icon name="paperclip" [size]="20" />
+    <p class="drop__text">
+      Arrastra archivos aquí o
+      <button appButton size="sm" type="button" [disabled]="slotsLeft() <= 0" (click)="picker.click()">
+        Seleccionar archivos
+      </button>
+    </p>
+    <p class="muted">
+      @if (slotsLeft() <= 0) {
+        Este ticket ya tiene el máximo de {{ maxFiles }} adjuntos.
+      } @else {
+        {{ limitsHint }}
+      }
+    </p>
+    <input #picker class="sr-only" type="file" multiple tabindex="-1" [accept]="accept" (change)="onPick($event)" />
+  </div>
+} @else {
+  <p class="notice">
+    <app-icon name="info" [size]="16" />
+    Este ticket está cerrado o cancelado y ya no admite adjuntos nuevos.
+  </p>
+}
+
+@if (rejections().length > 0) {
+  <div class="rejections" role="alert">
+    <p><strong>No se agregaron estos archivos:</strong></p>
+    <ul>
+      @for (reason of rejections(); track $index) {
+        <li>{{ reason }}</li>
+      }
+    </ul>
+    <button appButton size="sm" variant="ghost" type="button" (click)="clearRejections()">Entendido</button>
+  </div>
+}
+
+@if (queue().length > 0) {
+  <ul class="queue" aria-label="Archivos en cola">
+    @for (item of queue(); track item.id) {
+      <li class="queued">
+        <app-icon name="paperclip" [size]="18" />
+        <div class="queued__info">
+          <p class="name">
+            {{ item.file.name }}
+            <span class="muted">{{ size(item.file.size) }}</span>
+          </p>
+          @switch (item.status) {
+            @case ('uploading') {
+              <div
+                class="bar"
+                role="progressbar"
+                aria-valuemin="0"
+                aria-valuemax="100"
+                [attr.aria-valuenow]="item.percent"
+                [attr.aria-label]="'Subiendo ' + item.file.name"
+              >
+                <span [style.width.%]="item.percent"></span>
+              </div>
+              <p class="muted num">{{ item.percent < 100 ? item.percent + ' %' : 'Procesando…' }}</p>
+            }
+            @case ('queued') {
+              <p class="muted">En espera</p>
+            }
+            @case ('error') {
+              <p class="error" role="alert">{{ item.error }}</p>
+            }
+          }
+        </div>
+        @if (item.status === 'error') {
+          <button appButton size="sm" type="button" (click)="retry(item)">Reintentar</button>
+        }
+        <button
+          appButton
+          size="sm"
+          variant="ghost"
+          iconOnly
+          type="button"
+          [attr.aria-label]="(item.status === 'uploading' ? 'Cancelar la subida de ' : 'Quitar ') + item.file.name"
+          (click)="cancel(item)"
+        >
+          <app-icon name="x" [size]="14" />
+        </button>
+      </li>
+    }
+  </ul>
+}
+
+@if (listFailed()) {
+  <app-error-state title="No pudimos cargar los adjuntos" (retry)="reload()" />
+} @else if (files(); as list) {
+  @if (list.length > 0) {
+    <ul class="files">
+      @for (file of list; track file.id) {
+        <li class="file">
+          <app-icon class="file__icon" [name]="kind(file).icon" [size]="20" />
+          <div class="file__info">
+            <p class="name">{{ file.filename }}</p>
+            <p class="meta">
+              {{ kind(file).label }} · {{ size(file.sizeBytes) }} · {{ file.uploadedBy.fullName }} ·
+              <app-time [value]="file.createdAt" />
+            </p>
+          </div>
+          <div class="file__actions">
+            <button
+              appButton
+              size="sm"
+              variant="ghost"
+              iconOnly
+              type="button"
+              [attr.aria-label]="'Descargar ' + file.filename"
+              [disabled]="isDownloading(file.id)"
+              (click)="download(file)"
+            >
+              <app-icon [name]="isDownloading(file.id) ? 'loader' : 'download'" [size]="16"
+                        [spin]="isDownloading(file.id)" />
+            </button>
+            @if (file.canDelete) {
+              <button
+                appButton
+                size="sm"
+                variant="ghost"
+                iconOnly
+                type="button"
+                [attr.aria-label]="'Eliminar ' + file.filename"
+                [disabled]="isDeleting(file.id)"
+                (click)="remove(file)"
+              >
+                <app-icon name="trash" [size]="16" />
+              </button>
+            }
+          </div>
+        </li>
+      }
+    </ul>
+  } @else if (queue().length === 0) {
+    <p class="muted">Aún no hay adjuntos.</p>
+  }
+} @else {
+  <div role="status" aria-label="Cargando adjuntos">
+    <app-skeleton [lines]="2" />
+  </div>
+}

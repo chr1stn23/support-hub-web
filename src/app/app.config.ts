@@ -11,7 +11,12 @@ import {
   withInMemoryScrolling,
 } from '@angular/router';
 import { routes } from './app.routes';
-import { provideHttpClient, withInterceptors, withXsrfConfiguration } from '@angular/common/http';
+import {
+  provideHttpClient,
+  withInterceptors,
+  withXhr,
+  withXsrfConfiguration,
+} from '@angular/common/http';
 import { errorInterceptor } from '@core/auth/error.interceptor';
 import { AuthService } from '@core/auth/auth.service';
 import { sessionInterceptor } from '@core/auth/session.interceptor';
@@ -33,11 +38,13 @@ export const appConfig: ApplicationConfig = {
       withInterceptors([errorInterceptor, sessionInterceptor]),
       // CSRF: Angular lee la cookie XSRF-TOKEN y repite su valor en X-XSRF-TOKEN en cada escritura a rutas relativas
       withXsrfConfiguration({ cookieName: 'XSRF-TOKEN', headerName: 'X-XSRF-TOKEN' }),
+      // El backend por defecto (fetch) no informa del progreso de subida; XHR sí
+      withXhr(),
     ),
     // El router no navega hasta saber si hay una sesión viva
     provideAppInitializer(() => inject(AuthService).restore()),
     {
-      // Para que el overlay del cdk no ignore las configuracions del z-index
+      // Para que el overlay del cdk no ignore las configuraciones del z-index
       provide: OVERLAY_DEFAULT_CONFIG,
       useValue: { usePopover: false },
     },
