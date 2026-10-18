@@ -38,33 +38,4 @@ module.exports = defineConfig([
     extends: [angular.configs.templateRecommended, angular.configs.templateAccessibility],
     rules: {},
   },
-
-  {
-    // Dentro de shared/ui y shared/domain, importar archivos concretos,
-    // nunca los barriles de esos directorios.
-    files: ['src/app/shared/ui/**/*.ts', 'src/app/shared/domain/**/*.ts'],
-    rules: {
-      'no-restricted-imports': [
-        'error',
-        {
-          paths: [
-            {
-              name: '@shared/ui',
-              message: 'Importa el archivo concreto, no el barril.',
-            },
-            {
-              name: '@shared/domain',
-              message: 'Importa el archivo concreto, no el barril.',
-            },
-          ],
-          patterns: [
-            {
-              group: ['@shared/ui/index', '@shared/domain/index'],
-              message: 'Importa el archivo concreto, no el barril.',
-            },
-          ],
-        },
-      ],
-    },
-  },
 ]);

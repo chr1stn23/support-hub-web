@@ -1,7 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { AssetStatus } from '@core/api/models';
-import { Chip } from '@shared/ui';
+
 import { ASSET_STATUS } from './labels';
+import { Chip } from '@shared/ui';
 
 @Component({
   selector: 'app-asset-status',

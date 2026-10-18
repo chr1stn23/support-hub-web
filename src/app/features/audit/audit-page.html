@@ -1,0 +1,167 @@
+<app-page-header title="Auditoría" description="Registro de acciones sensibles, de la más reciente a la más antigua." />
+
+<div class="list-filters" role="search">
+  <select class="control" aria-label="Filtrar por acción" (change)="setAction($event)">
+    <option value="" [selected]="state().action === ''">Todas las acciones</option>
+    @for (group of actionGroups; track group.label) {
+      <optgroup [label]="group.label">
+        @for (action of group.actions; track action) {
+          <option [value]="action" [selected]="action === state().action">{{ actionLabel[action] }}</option>
+        }
+      </optgroup>
+    }
+  </select>
+
+  <select class="control" aria-label="Filtrar por área" (change)="setArea($event)">
+    <option value="" [selected]="state().area === ''">Todas las áreas</option>
+    @for (area of areas; track area.id) {
+      <option [value]="area.id" [selected]="area.id === state().area">{{ area.label }}</option>
+    }
+  </select>
+
+  <select class="control" aria-label="Filtrar por resultado" (change)="setResult($event)">
+    <option value="" [selected]="state().result === ''">Todos los resultados</option>
+    @for (result of results; track result.id) {
+      <option [value]="result.id" [selected]="result.id === state().result">{{ result.label }}</option>
+    }
+  </select>
+
+  <label class="date">
+    <span>Desde</span>
+    <input class="control" type="date" [value]="state().from" (change)="setDay('from', $event)" />
+  </label>
+  <label class="date">
+    <span>Hasta</span>
+    <input class="control" type="date" [value]="state().to" (change)="setDay('to', $event)" />
+  </label>
+
+  @if (actorName(); as name) {
+    <button appButton size="sm" type="button" aria-label="Quitar el filtro de persona" (click)="clearActor()">
+      Persona: {{ name }}
+      <app-icon name="x" [size]="14" />
+    </button>
+  }
+  @if (hasFilters()) {
+    <button appButton variant="ghost" type="button" (click)="clearFilters()">
+      <app-icon name="x" [size]="14" />
+      Limpiar filtros
+    </button>
+  }
+</div>
+
+@if (dateProblem(); as problem) {
+  <p class="callout callout--warning range" role="status">
+    <app-icon name="info" [size]="16" />
+    {{ problem }}
+  </p>
+}
+
+<p class="sr-only" aria-live="polite">{{ announcement() }}</p>
+
+@if (error(); as failure) {
+  <app-error-state [error]="failure" title="No pudimos cargar la auditoría" (retry)="list.reload()" />
+} @else if (rows(); as items) {
+  @if (items.length === 0) {
+    @if (hasFilters()) {
+      <app-empty-state
+        icon="search"
+        title="Ningún registro coincide con los filtros"
+        description="Prueba con otro rango de fechas o quita algún filtro."
+      >
+        <button appButton type="button" (click)="clearFilters()">Limpiar filtros</button>
+      </app-empty-state>
+    } @else {
+      <app-empty-state icon="clipboard-list" title="Aún no hay registros"
+                       description="Las acciones sensibles aparecerán aquí." />
+    }
+  } @else {
+    <div class="table-wrap" [class.is-stale]="loading()" [attr.aria-busy]="loading() ? 'true' : null">
+      <table class="table">
+        <caption class="sr-only">
+          Registro de auditoría
+        </caption>
+        <thead>
+        <tr>
+          <th>Fecha</th>
+          <th>Persona</th>
+          <th>Qué pasó</th>
+          <th>Objeto</th>
+          <th>Resultado</th>
+        </tr>
+        </thead>
+        <tbody>
+          @for (row of items; track row.entry.id) {
+            <tr [class.is-alert]="row.text.alert">
+              <td>
+                <time [attr.datetime]="row.entry.createdAt" [attr.title]="relative(row.entry.createdAt)">
+                  {{ exact(row.entry.createdAt) }}
+                </time>
+              </td>
+              <td>
+                @if (row.entry.actor; as actor) {
+                  <a
+                    class="actor"
+                    [routerLink]="[]"
+                    [queryParams]="actorParams(actor.id)"
+                    [attr.title]="'Ver solo la actividad de ' + actor.fullName"
+                  >
+                    <app-avatar [name]="actor.fullName" size="sm" />
+                    {{ actor.fullName }}
+                  </a>
+                } @else {
+                  <span class="muted">Desconocido</span>
+                }
+              </td>
+              <td class="cell-wrap">
+                <p class="summary">{{ row.text.summary }}</p>
+                @if (row.text.details.length > 0) {
+                  <details class="meta">
+                    <summary>Detalles</summary>
+                    <dl>
+                      @for (detail of row.text.details; track detail.label) {
+                        <div>
+                          <dt>{{ detail.label }}</dt>
+                          <dd>{{ detail.value }}</dd>
+                        </div>
+                      }
+                    </dl>
+                  </details>
+                }
+              </td>
+              <td>
+                @if (row.text.target; as target) {
+                  @if (target.link; as link) {
+                    <a [routerLink]="link">{{ target.label }}</a>
+                  } @else {
+                    {{ target.label }}
+                  }
+                } @else {
+                  <span class="muted">—</span>
+                }
+              </td>
+              <td>
+                <app-chip [tone]="resultTone(row.entry)">{{ resultLabel(row.entry) }}</app-chip>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <app-pagination
+      class="list-pager"
+      [page]="state().page"
+      [size]="state().size"
+      [totalElements]="page()!.totalElements"
+      [sizeOptions]="sizeOptions"
+      (pageChange)="onPage($event)"
+      (sizeChange)="onSize($event)"
+    />
+  }
+} @else {
+  <div class="table-wrap list-loading" role="status" aria-label="Cargando la auditoría">
+    @for (row of [1, 2, 3, 4, 5, 6]; track row) {
+      <app-skeleton height="1rem" />
+    }
+  </div>
+}

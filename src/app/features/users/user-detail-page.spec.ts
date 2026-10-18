@@ -227,6 +227,14 @@ describe('UserDetailPage', () => {
       await settle();
       http.expectNone(U);
     });
+
+    it('offers a link to see the activity of that person in the audit', async () => {
+      await setup();
+      const link = Array.from(el().querySelectorAll<HTMLAnchorElement>('a')).find(
+        (a) => a.textContent?.trim() === 'Ver su actividad',
+      )!;
+      expect(link.getAttribute('href')).toBe('/auditoria?persona=u-2');
+    });
   });
 
   describe('deactivating and reactivating', () => {
@@ -271,12 +279,10 @@ describe('UserDetailPage', () => {
 
       button('Desactivar')!.click();
       await settle();
-      http
-        .expectOne(`${U}/deactivate`)
-        .flush(apiError(409, 'USER_HAS_ACTIVE_ASSIGNMENTS'), {
-          status: 409,
-          statusText: 'Conflict',
-        });
+      http.expectOne(`${U}/deactivate`).flush(apiError(409, 'USER_HAS_ACTIVE_ASSIGNMENTS'), {
+        status: 409,
+        statusText: 'Conflict',
+      });
       await settle();
 
       expect(TestBed.inject(ToastService).toasts()[0].kind).toBe('error');

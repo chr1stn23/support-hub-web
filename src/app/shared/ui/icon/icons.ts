@@ -107,6 +107,7 @@ export const ICONS = {
     path('M6.6 6.6A17 17 0 0 0 2 12s3.5 6 10 6c1.4 0 2.7-.3 3.9-.7'),
     path('M9.9 9.9a3 3 0 0 0 4.2 4.2'),
   ],
+  lock: [rect(5, 11, 14, 10, 2), path('M8 11V8a4 4 0 0 1 8 0v3')],
 } as const satisfies Record<string, readonly Shape[]>;
 
 export type IconName = keyof typeof ICONS;

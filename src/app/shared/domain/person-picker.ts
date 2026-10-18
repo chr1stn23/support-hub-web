@@ -14,10 +14,7 @@ import { debounceTime, distinctUntilChanged, map } from 'rxjs';
 import type { UserLookup } from '@core/api/models';
 import { UsersApi } from '@core/api/users.api';
 import { loadable } from '@core/http/loadable';
-import { Avatar } from '@shared/ui';
-import { Icon } from '@shared/ui';
-import { ErrorState } from '@shared/ui';
-import { Skeleton } from '@shared/ui';
+import { Avatar, ErrorState, Icon, Skeleton } from '@shared/ui';
 
 const SEARCH_DEBOUNCE_MS = 300;
 let nextPickerId = 0;

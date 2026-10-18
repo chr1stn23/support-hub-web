@@ -106,4 +106,12 @@ export class UsersApi {
   resetPassword(id: string, newPassword: string): Observable<void> {
     return this.http.post<void>(`${API_BASE}/users/${id}/password`, { newPassword });
   }
+
+  /**
+   * Cambia la contraseña de quien tiene la sesión. El servidor responde con una sesión nueva (cookies): aquí se
+   * sigue dentro y se cierran las de los demás dispositivos.
+   */
+  changeOwnPassword(currentPassword: string, newPassword: string): Observable<void> {
+    return this.http.post<void>(`${API_BASE}/users/me/password`, { currentPassword, newPassword });
+  }
 }

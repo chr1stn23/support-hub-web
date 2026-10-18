@@ -104,8 +104,7 @@ export const routes: Routes = [
         path: 'auditoria',
         canActivate: [roleGuard(...ACCESS.admin)],
         title: 'Auditoría',
-        loadComponent: placeholder,
-        data: { heading: 'Auditoría', description: 'Registro de acciones sensibles.' },
+        loadComponent: () => import('./features/audit/audit-page').then((m) => m.AuditPage),
       },
       {
         path: 'notificaciones',

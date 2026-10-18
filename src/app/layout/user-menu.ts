@@ -2,7 +2,9 @@ import { CdkMenu, CdkMenuItem, CdkMenuTrigger } from '@angular/cdk/menu';
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { AuthService } from '@core/auth/auth.service';
 import { sortedRoleLabels } from '@shared/domain';
-import { Avatar, Icon } from '@shared/ui';
+import { Avatar } from '@shared/ui';
+import { DialogService } from '@shared/ui';
+import { Icon } from '@shared/ui';
 
 @Component({
   selector: 'app-user-menu',
@@ -26,6 +28,15 @@ import { Avatar, Icon } from '@shared/ui';
 
     <ng-template #menu>
       <div class="menu" cdkMenu>
+        <button
+          type="button"
+          class="menu__item"
+          cdkMenuItem
+          (cdkMenuItemTriggered)="changePassword()"
+        >
+          <app-icon name="lock" [size]="16" />
+          Cambiar contraseña
+        </button>
         <button type="button" class="menu__item" cdkMenuItem (cdkMenuItemTriggered)="signOut()">
           <app-icon name="log-out" [size]="16" />
           Cerrar sesión
@@ -68,7 +79,7 @@ import { Avatar, Icon } from '@shared/ui';
     }
 
     .menu {
-      min-width: 12rem;
+      min-width: 13rem;
       padding: var(--space-1);
       background: var(--color-bg);
       border: 1px solid var(--color-border);
@@ -97,12 +108,22 @@ import { Avatar, Icon } from '@shared/ui';
 })
 export class UserMenu {
   private readonly auth = inject(AuthService);
+  private readonly dialogs = inject(DialogService);
 
   protected readonly name = computed(() => this.auth.user()?.fullName ?? '');
   private readonly labels = computed(() => sortedRoleLabels(this.auth.roles()));
   /** El rol principal, a la vista. */
   protected readonly roleLabel = computed(() => this.labels()[0] ?? '');
   protected readonly allRoles = computed(() => this.labels().join(' · '));
+
+  /** El diálogo se carga solo al abrirlo: no pesa en el arranque de la aplicación. */
+  protected async changePassword(): Promise<void> {
+    const { ChangePasswordDialog } = await import('../features/account/change-password-dialog');
+    this.dialogs.open(ChangePasswordDialog, {
+      ariaLabel: 'Cambiar mi contraseña',
+      width: 'min(30rem, calc(100vw - 2rem))',
+    });
+  }
 
   protected signOut(): void {
     this.auth.logout();

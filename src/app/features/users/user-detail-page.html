@@ -28,6 +28,7 @@
         Editar
       </button>
       <button appButton type="button" (click)="openRoles(u)">Cambiar roles</button>
+      <a appButton routerLink="/auditoria" [queryParams]="{ persona: u.id }">Ver su actividad</a>
       @if (!isSelf()) {
         <button appButton type="button" (click)="openReset(u)">Restablecer contraseña</button>
         @if (u.active) {

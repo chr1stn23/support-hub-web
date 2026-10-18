@@ -154,4 +154,15 @@ describe('UsersApi', () => {
       reset.flush(null, { status: 204, statusText: 'No Content' });
     });
   });
+
+  it('changes the own password with the current one and the new one', () => {
+    api.changeOwnPassword('Vieja1234!', 'Nueva1234!').subscribe();
+    const request = http.expectOne('/api/v1/users/me/password');
+    expect(request.request.method).toBe('POST');
+    expect(request.request.body).toEqual({
+      currentPassword: 'Vieja1234!',
+      newPassword: 'Nueva1234!',
+    });
+    request.flush(null, { status: 204, statusText: 'No Content' });
+  });
 });

@@ -279,3 +279,46 @@ export interface UpdateUserRequest {
   fullName?: string;
   email?: string;
 }
+
+// Auditoria
+
+export type AuditAction =
+  | 'LOGIN_SUCCESS'
+  | 'LOGIN_FAILED'
+  | 'LOGOUT'
+  | 'ACCESS_DENIED'
+  | 'REFRESH_REUSE_DETECTED'
+  | 'PASSWORD_CHANGED'
+  | 'PASSWORD_RESET'
+  | 'USER_CREATED'
+  | 'USER_UPDATED'
+  | 'USER_ROLES_CHANGED'
+  | 'USER_DEACTIVATED'
+  | 'USER_ACTIVATED'
+  | 'TICKET_CREATED'
+  | 'TICKET_UPDATED'
+  | 'TICKET_ASSIGNED'
+  | 'TICKET_STATUS_CHANGED'
+  | 'TICKET_COMMENT_ADDED'
+  | 'ATTACHMENT_ADDED'
+  | 'ATTACHMENT_DELETED'
+  | 'ASSET_CREATED'
+  | 'ASSET_UPDATED'
+  | 'ASSET_ASSIGNED'
+  | 'ASSET_TRANSFERRED'
+  | 'ASSET_RETURNED'
+  | 'ASSET_STATUS_CHANGED';
+
+export type AuditEntityType = 'TICKET' | 'ASSET' | 'USER' | 'SECURITY';
+export type AuditResult = 'SUCCESS' | 'FAILURE';
+
+export interface AuditLogEntry {
+  id: string;
+  actor: UserSummary | null;
+  action: string;
+  entityType: string;
+  entityId: string | null;
+  result: string;
+  metadata: Record<string, unknown> | null;
+  createdAt: string;
+}

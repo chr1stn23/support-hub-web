@@ -5,8 +5,11 @@ import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { vi } from 'vitest';
 
-import { AuthService } from '../core/auth/auth.service';
+import { AuthService } from '@core/auth/auth.service';
 import { UserMenu } from './user-menu';
+import { DialogService } from '@shared/ui';
+import { of } from 'rxjs';
+import { ChangePasswordDialog } from '@features/account/change-password-dialog';
 
 const settle = async () => {
   TestBed.inject(ApplicationRef).tick();
@@ -65,11 +68,38 @@ describe('UserMenu', () => {
     el.querySelector<HTMLButtonElement>('.trigger')!.click();
     await settle();
 
-    const item = document.querySelector<HTMLButtonElement>('[cdkMenuItem]');
+    const item = Array.from(document.querySelectorAll<HTMLButtonElement>('[cdkMenuItem]')).find(
+      (b) => b.textContent?.includes('Cerrar sesión'),
+    );
     expect(item?.textContent).toContain('Cerrar sesión');
 
     item!.click();
     await settle();
     expect(logout).toHaveBeenCalledOnce();
+  });
+
+  it('offers to change the password, and opens its dialog', async () => {
+    const { el } = setup();
+    const open = vi
+      .spyOn(TestBed.inject(DialogService), 'open')
+      .mockReturnValue({ closed: of(true) } as never);
+
+    el.querySelector<HTMLButtonElement>('.trigger')!.click();
+    await settle();
+
+    const item = Array.from(document.querySelectorAll<HTMLButtonElement>('[cdkMenuItem]')).find(
+      (b) => b.textContent?.includes('Cambiar contraseña'),
+    )!;
+    expect(item).toBeTruthy();
+
+    item.click();
+    await settle();
+
+    await vi.waitFor(() => {
+      expect(open).toHaveBeenCalledWith(
+        ChangePasswordDialog,
+        expect.objectContaining({ ariaLabel: 'Cambiar mi contraseña' }),
+      );
+    });
   });
 });

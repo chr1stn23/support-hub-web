@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
-import type { AssetStatus, TicketPriority, TicketStatus } from '../../core/api/models';
+import type { AssetStatus, TicketPriority, TicketStatus } from '@core/api/models';
 import { AssetStatusChip } from './asset-status-chip';
 import {
   ASSET_STATUS,
