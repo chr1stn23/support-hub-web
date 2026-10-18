@@ -121,4 +121,11 @@ describe('AssetsApi', () => {
     expect(status.request.body).toEqual({ status: 'MAINTENANCE' });
     status.flush({});
   });
+
+  it('can list only the equipment of one person', () => {
+    api.list({ page: 0, size: 50, sort: 'assetTag,asc', assignedTo: 'u-2' }).subscribe();
+    const request = http.expectOne((r) => r.url === '/api/v1/assets');
+    expect(request.request.params.get('assignedTo')).toBe('u-2');
+    request.flush({});
+  });
 });

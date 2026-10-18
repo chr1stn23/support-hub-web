@@ -79,4 +79,79 @@ describe('UsersApi', () => {
     expect(request.request.params.has('search')).toBe(false);
     request.flush(page());
   });
+
+  describe('administration', () => {
+    it('lists with page, size and sort, and only the filters that have a value', () => {
+      api.list({ page: 2, size: 50, sort: 'email,desc' }).subscribe();
+      const request = http.expectOne((r) => r.url === '/api/v1/users');
+      expect(request.request.params.get('page')).toBe('2');
+      expect(request.request.params.get('sort')).toBe('email,desc');
+      for (const name of ['active', 'role', 'search']) {
+        expect(request.request.params.has(name)).toBe(false);
+      }
+      request.flush({});
+    });
+
+    it('sends the state (also when it is false), the role and the search', () => {
+      api
+        .list({
+          page: 0,
+          size: 20,
+          sort: 'fullName,asc',
+          active: false,
+          role: 'AGENT',
+          search: 'ana',
+        })
+        .subscribe();
+      const request = http.expectOne((r) => r.url === '/api/v1/users');
+      expect(request.request.params.get('active')).toBe('false');
+      expect(request.request.params.get('role')).toBe('AGENT');
+      expect(request.request.params.get('search')).toBe('ana');
+      request.flush({});
+    });
+
+    it('reads, creates and edits a user', () => {
+      api.get('u-2').subscribe();
+      http.expectOne('/api/v1/users/u-2').flush({});
+
+      api
+        .create({ email: 'a@x.com', fullName: 'Ana', password: 'Demo1234!', roles: ['USER'] })
+        .subscribe();
+      const create = http.expectOne('/api/v1/users');
+      expect(create.request.method).toBe('POST');
+      expect(create.request.body).toEqual({
+        email: 'a@x.com',
+        fullName: 'Ana',
+        password: 'Demo1234!',
+        roles: ['USER'],
+      });
+      create.flush({});
+
+      api.update('u-2', { version: 3, fullName: 'Nuevo' }).subscribe();
+      const update = http.expectOne('/api/v1/users/u-2');
+      expect(update.request.method).toBe('PATCH');
+      expect(update.request.body).toEqual({ version: 3, fullName: 'Nuevo' });
+      update.flush({});
+    });
+
+    it('changes roles with PUT, and activates, deactivates and resets the password with POST', () => {
+      api.changeRoles('u-2', ['AGENT', 'USER']).subscribe();
+      const roles = http.expectOne('/api/v1/users/u-2/roles');
+      expect(roles.request.method).toBe('PUT');
+      expect(roles.request.body).toEqual({ roles: ['AGENT', 'USER'] });
+      roles.flush({});
+
+      api.deactivate('u-2').subscribe();
+      expect(http.expectOne('/api/v1/users/u-2/deactivate').request.method).toBe('POST');
+      api.activate('u-2').subscribe();
+      expect(http.expectOne('/api/v1/users/u-2/activate').request.method).toBe('POST');
+      // los dos expectOne anteriores dejan las peticiones sin responder: las respondemos para que verify() no falle
+      http.match(() => true).forEach((r) => r.flush({}));
+
+      api.resetPassword('u-2', 'Nueva1234').subscribe();
+      const reset = http.expectOne('/api/v1/users/u-2/password');
+      expect(reset.request.body).toEqual({ newPassword: 'Nueva1234' });
+      reset.flush(null, { status: 204, statusText: 'No Content' });
+    });
+  });
 });

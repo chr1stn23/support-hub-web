@@ -1,0 +1,135 @@
+<app-page-header title="Usuarios" description="Cuentas, roles y estado de acceso.">
+  <button appButton variant="primary" type="button" (click)="openCreate()">
+    <app-icon name="plus" [size]="14" />
+    Nuevo usuario
+  </button>
+</app-page-header>
+
+<nav class="link-tabs" aria-label="Estado de las cuentas">
+  @for (view of views; track view.id) {
+    <a
+      class="link-tab"
+      [routerLink]="[]"
+      [queryParams]="tabParams(view.id)"
+      [class.is-active]="state().view === view.id"
+      [attr.aria-current]="state().view === view.id ? 'page' : null"
+    >
+      {{ view.label }}
+    </a>
+  }
+</nav>
+
+<div class="list-filters" role="search">
+  <div class="list-search">
+    <app-icon name="search" [size]="16" />
+    <input
+      class="control"
+      type="search"
+      aria-label="Buscar usuarios"
+      placeholder="Buscar por nombre o correo"
+      maxlength="100"
+      [value]="searchDraft()"
+      (input)="searchDraft.set($any($event.target).value)"
+    />
+  </div>
+
+  <select class="control" aria-label="Filtrar por rol" (change)="setRole($event)">
+    <option value="" [selected]="state().role === ''">Todos los roles</option>
+    @for (option of roleOptions; track option.value) {
+      <option [value]="option.value" [selected]="option.value === state().role">{{ option.label }}</option>
+    }
+  </select>
+
+  @if (hasFilters()) {
+    <button appButton variant="ghost" type="button" (click)="clearFilters()">
+      <app-icon name="x" [size]="14" />
+      Limpiar filtros
+    </button>
+  }
+</div>
+
+<p class="sr-only" aria-live="polite">{{ announcement() }}</p>
+
+@if (error(); as failure) {
+  <app-error-state [error]="failure" title="No pudimos cargar los usuarios" (retry)="list.reload()" />
+} @else if (page(); as data) {
+  @if (data.content.length === 0) {
+    @if (hasFilters()) {
+      <app-empty-state
+        icon="search"
+        title="Ningún usuario coincide con tu búsqueda"
+        description="Prueba con otras palabras o quita algún filtro."
+      >
+        <button appButton type="button" (click)="clearFilters()">Limpiar filtros</button>
+      </app-empty-state>
+    } @else {
+      <app-empty-state icon="users" title="No hay usuarios en esta vista"
+                       description="Cuando los haya, aparecerán aquí." />
+    }
+  } @else {
+    <div class="table-wrap" [class.is-stale]="loading()" [attr.aria-busy]="loading() ? 'true' : null">
+      <table class="table">
+        <caption class="sr-only">
+          Usuarios
+        </caption>
+        <thead>
+        <tr>
+          <th appSortHeader="fullName" [sort]="state().sort" (sortChange)="onSort($event)">Nombre</th>
+          <th appSortHeader="email" [sort]="state().sort" (sortChange)="onSort($event)">Correo</th>
+          <th>Roles</th>
+          <th>Estado</th>
+          <th>Último acceso</th>
+        </tr>
+        </thead>
+        <tbody>
+          @for (user of data.content; track user.id) {
+            <tr>
+              <td class="cell-wrap">
+                <a class="name" [routerLink]="['/usuarios', user.id]">{{ user.fullName }}</a>
+                @if (user.id === selfId()) {
+                  <app-chip tone="neutral-soft">Tú</app-chip>
+                }
+              </td>
+              <td>{{ user.email }}</td>
+              <td>
+                <span class="chips">
+                  @for (label of roleLabels(user.roles); track label) {
+                    <app-chip tone="neutral-soft">{{ label }}</app-chip>
+                  }
+                </span>
+              </td>
+              <td>
+                <app-chip [tone]="user.active ? 'success' : 'neutral-soft'">
+                  {{ user.active ? 'Activo' : 'Inactivo' }}
+                </app-chip>
+              </td>
+              <td>
+                @if (user.lastLoginAt; as at) {
+                  <app-time [value]="at" />
+                } @else {
+                  <span class="muted">Nunca</span>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <app-pagination
+      class="list-pager"
+      [page]="state().page"
+      [size]="state().size"
+      [totalElements]="data.totalElements"
+      [sizeOptions]="sizeOptions"
+      (pageChange)="onPage($event)"
+      (sizeChange)="onSize($event)"
+    />
+  }
+} @else {
+  <div class="table-wrap list-loading" role="status" aria-label="Cargando usuarios">
+    @for (row of [1, 2, 3, 4, 5, 6]; track row) {
+      <app-skeleton height="1rem" />
+    }
+  </div>
+}

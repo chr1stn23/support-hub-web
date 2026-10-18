@@ -1,0 +1,170 @@
+<a class="detail-back" routerLink="/usuarios">
+  <app-icon name="chevron-left" [size]="14" />
+  Usuarios
+</a>
+
+@if (notFound()) {
+  <app-empty-state icon="search" title="No encontramos a esta persona" description="Puede que la cuenta ya no exista.">
+    <a appButton variant="primary" routerLink="/usuarios">Volver a los usuarios</a>
+  </app-empty-state>
+} @else if (userError(); as failure) {
+  <app-error-state [error]="failure" title="No pudimos cargar el usuario" (retry)="refresh()" />
+} @else if (view(); as u) {
+  <header class="detail-head">
+    <div>
+      <h1>{{ u.fullName }}</h1>
+      <p class="email">{{ u.email }}</p>
+      <div class="chips">
+        <app-chip [tone]="u.active ? 'success' : 'neutral-soft'">{{ u.active ? 'Activo' : 'Inactivo' }}</app-chip>
+        @for (label of roleLabels(); track label) {
+          <app-chip tone="neutral-soft">{{ label }}</app-chip>
+        }
+      </div>
+    </div>
+
+    <div class="detail-head__actions">
+      <button appButton type="button" (click)="openEdit(u)">
+        <app-icon name="pencil" [size]="14" />
+        Editar
+      </button>
+      <button appButton type="button" (click)="openRoles(u)">Cambiar roles</button>
+      @if (!isSelf()) {
+        <button appButton type="button" (click)="openReset(u)">Restablecer contraseña</button>
+        @if (u.active) {
+          <button appButton variant="danger" type="button" [loading]="toggling()" (click)="deactivate(u)">
+            Desactivar
+          </button>
+        } @else {
+          <button appButton variant="primary" type="button" [loading]="toggling()" (click)="activate(u)">
+            Reactivar
+          </button>
+        }
+      }
+    </div>
+  </header>
+
+  @if (isSelf()) {
+    <p class="callout callout--info notice">
+      <app-icon name="info" [size]="16" />
+      Esta es tu cuenta: no puedes desactivarla, quitarte el rol de administrador ni restablecer tu propia contraseña
+      desde aquí.
+    </p>
+  }
+  @if (pendingHint(); as hint) {
+    <p class="callout callout--warning notice">
+      <app-icon name="alert-triangle" [size]="16" />
+      {{ hint }}
+    </p>
+  }
+
+  <div class="detail-layout">
+    <div class="detail-main">
+      <section class="detail-block" aria-labelledby="equipment-title">
+        <h2 id="equipment-title">
+          Equipos asignados
+          @if (equipmentPage(); as page) {
+            <span class="detail-count num">{{ page.totalElements }}</span>
+          }
+        </h2>
+        @if (equipmentFailed()) {
+          <app-error-state title="No pudimos cargar los equipos" (retry)="equipment.reload()" />
+        } @else if (equipmentPage(); as page) {
+          @if (page.content.length === 0) {
+            <p class="muted">No tiene equipos asignados.</p>
+          } @else {
+            <ul class="items">
+              @for (asset of page.content; track asset.id) {
+                <li class="item">
+                  <a class="item__title" [routerLink]="['/activos', asset.id]">
+                    <span class="mono code">{{ asset.assetTag }}</span>
+                    {{ assetName(asset) }}
+                  </a>
+                  <app-asset-status [status]="asset.status" />
+                </li>
+              }
+            </ul>
+          }
+        } @else {
+          <app-skeleton [lines]="2" />
+        }
+      </section>
+
+      <section class="detail-block" aria-labelledby="tickets-title">
+        <h2 id="tickets-title">
+          Tickets en curso a su cargo
+          @if (ticketsPage(); as page) {
+            <span class="detail-count num">{{ page.totalElements }}</span>
+          }
+        </h2>
+        @if (ticketsFailed()) {
+          <app-error-state title="No pudimos cargar los tickets" (retry)="tickets.reload()" />
+        } @else if (ticketsPage(); as page) {
+          @if (page.content.length === 0) {
+            <p class="muted">No tiene tickets en curso.</p>
+          } @else {
+            <ul class="items">
+              @for (ticket of page.content; track ticket.id) {
+                <li class="item">
+                  <a class="item__title" [routerLink]="['/tickets', ticket.id]">
+                    <span class="mono code">{{ ticket.ticketCode }}</span>
+                    {{ ticket.title }}
+                  </a>
+                  <span class="item__meta">
+                    <app-ticket-status [status]="ticket.status" />
+                    <app-priority [priority]="ticket.priority" />
+                  </span>
+                </li>
+              }
+            </ul>
+          }
+        } @else {
+          <app-skeleton [lines]="2" />
+        }
+      </section>
+    </div>
+
+    <aside class="detail-side" aria-label="Datos de la cuenta">
+      <dl class="detail-facts">
+        <div class="row">
+          <dt>Correo</dt>
+          <dd>{{ u.email }}</dd>
+        </div>
+        <div class="row">
+          <dt>Estado</dt>
+          <dd>{{ u.active ? 'Activo' : 'Inactivo' }}</dd>
+        </div>
+        <div class="row">
+          <dt>Roles</dt>
+          <dd>{{ roleLabels().join(' · ') }}</dd>
+        </div>
+        <div class="row">
+          <dt>Último acceso</dt>
+          <dd>
+            @if (u.lastLoginAt; as at) {
+              <app-time [value]="at" />
+            } @else {
+              <span class="muted">Nunca</span>
+            }
+          </dd>
+        </div>
+        <div class="row">
+          <dt>Cuenta creada</dt>
+          <dd>
+            <app-time [value]="u.createdAt" />
+          </dd>
+        </div>
+        <div class="row">
+          <dt>Actualizada</dt>
+          <dd>
+            <app-time [value]="u.updatedAt" />
+          </dd>
+        </div>
+      </dl>
+    </aside>
+  </div>
+} @else {
+  <div role="status" aria-label="Cargando el usuario" class="loading">
+    <app-skeleton width="60%" height="1.75rem" />
+    <app-skeleton [lines]="4" />
+  </div>
+}

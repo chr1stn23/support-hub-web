@@ -22,6 +22,8 @@ export interface AssetListQuery {
   readonly status?: AssetStatus;
   readonly assetTypeId?: string;
   readonly search?: string;
+  /** Solo los equipos que tiene esta persona. */
+  readonly assignedTo?: string;
 }
 
 @Service()
@@ -40,6 +42,7 @@ export class AssetsApi {
     if (query.status) params = params.set('status', query.status);
     if (query.assetTypeId) params = params.set('assetTypeId', query.assetTypeId);
     if (query.search) params = params.set('search', query.search);
+    if (query.assignedTo) params = params.set('assignedTo', query.assignedTo);
     return this.http.get<PageResponse<AssetListItem>>(`${API_BASE}/assets`, { params });
   }
 

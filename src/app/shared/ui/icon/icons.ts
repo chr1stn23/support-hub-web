@@ -100,6 +100,13 @@ export const ICONS = {
   file: [path('M7 3h7l5 5v13H7V3Z'), path('M14 3v5h5')],
   'file-text': [path('M7 3h7l5 5v13H7V3Z'), path('M14 3v5h5'), path('M10 13h6'), path('M10 17h6')],
   image: [rect(4, 5, 16, 14, 2), circle(9, 10, 1.5), path('m5 17 4.5-4.5 3.5 3.5 2-2L20 17')],
+  eye: [path('M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z'), circle(12, 12, 3)],
+  'eye-off': [
+    path('M3 3l18 18'),
+    path('M10.6 6.1A10.7 10.7 0 0 1 12 6c6.5 0 10 6 10 6a17 17 0 0 1-3.2 3.9'),
+    path('M6.6 6.6A17 17 0 0 0 2 12s3.5 6 10 6c1.4 0 2.7-.3 3.9-.7'),
+    path('M9.9 9.9a3 3 0 0 0 4.2 4.2'),
+  ],
 } as const satisfies Record<string, readonly Shape[]>;
 
 export type IconName = keyof typeof ICONS;

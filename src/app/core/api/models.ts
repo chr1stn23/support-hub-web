@@ -252,3 +252,30 @@ export interface AssignAssetRequest {
   userId: string;
   notes?: string | null;
 }
+
+// Administración de usuarios
+
+export interface UserAdmin {
+  id: string;
+  email: string;
+  fullName: string;
+  active: boolean;
+  roles: Role[];
+  lastLoginAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+  version: number;
+}
+
+export interface CreateUserRequest {
+  email: string;
+  fullName: string;
+  password: string;
+  roles: Role[];
+}
+
+export interface UpdateUserRequest {
+  version: number;
+  fullName?: string;
+  email?: string;
+}

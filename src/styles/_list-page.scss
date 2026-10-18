@@ -1,0 +1,50 @@
+// Barra de filtros y pie de las pantallas de lista.
+.list-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+
+  .control {
+    width: auto;
+    min-width: 11rem;
+  }
+}
+
+.list-search {
+  position: relative;
+  flex: 1 1 18rem;
+  max-width: 28rem;
+
+  app-icon {
+    position: absolute;
+    top: 50%;
+    left: var(--space-3);
+    color: var(--color-text-secondary);
+    transform: translateY(-50%);
+    pointer-events: none;
+  }
+
+  .control {
+    width: 100%;
+    padding-left: 2.25rem;
+  }
+}
+
+.list-pager {
+  display: block;
+  margin-top: var(--space-4);
+}
+
+.list-loading {
+  display: grid;
+  gap: var(--space-5);
+  padding: var(--space-5);
+}
+
+// Mientras se recarga, la tabla anterior se queda a la vista, atenuada
+.table-wrap.is-stale {
+  opacity: 0.55;
+  transition: opacity var(--dur-base) var(--ease-out);
+}

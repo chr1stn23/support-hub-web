@@ -91,8 +91,14 @@ export const routes: Routes = [
         path: 'usuarios',
         canActivate: [roleGuard(...ACCESS.admin)],
         title: 'Usuarios',
-        loadComponent: placeholder,
-        data: { heading: 'Usuarios', description: 'Cuentas, roles y estado de acceso.' },
+        loadComponent: () => import('./features/users/user-list-page').then((m) => m.UserListPage),
+      },
+      {
+        path: 'usuarios/:id',
+        canActivate: [roleGuard(...ACCESS.admin)],
+        title: 'Usuario',
+        loadComponent: () =>
+          import('./features/users/user-detail-page').then((m) => m.UserDetailPage),
       },
       {
         path: 'auditoria',
