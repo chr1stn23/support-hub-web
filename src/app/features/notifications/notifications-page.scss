@@ -1,0 +1,63 @@
+.items {
+  display: grid;
+  gap: var(--space-2);
+  padding: 0;
+  margin: 0;
+  list-style: none;
+
+  &.is-stale {
+    opacity: 0.55;
+    transition: opacity var(--dur-base) var(--ease-out);
+  }
+}
+
+.item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+
+  &__icon {
+    display: grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    color: var(--color-text-secondary);
+    background: var(--color-bg-subtle);
+    border-radius: var(--radius-full);
+  }
+
+  // Los mensajes los escribe el backend con datos de personas: se parten si son largos, nunca se interpretan
+  &__message {
+    overflow-wrap: anywhere;
+    color: var(--color-text);
+  }
+
+  &__meta {
+    font-size: var(--text-xs);
+    color: var(--color-text-secondary);
+  }
+
+  // Una no leída: fondo suave, marca de acento y la etiqueta escrita (no depende solo del color)
+  &.is-unread {
+    background: var(--color-bg-selected);
+    border-left: 3px solid var(--color-accent);
+  }
+
+  &.is-unread &__message {
+    font-weight: var(--weight-medium);
+  }
+}
+
+a.item__message:hover {
+  text-decoration: underline;
+}
+
+.unread-label {
+  font-weight: var(--weight-medium);
+  color: var(--color-text-selected);
+}

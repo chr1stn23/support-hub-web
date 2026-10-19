@@ -1,0 +1,100 @@
+<app-page-header title="Notificaciones" description="Lo que ha pasado con tus tickets y tus equipos.">
+  <button appButton type="button" (click)="reload()">Actualizar</button>
+  <button appButton type="button" [loading]="markingAll()" [disabled]="unread() === 0" (click)="markAll()">
+    Marcar todas como leídas
+  </button>
+</app-page-header>
+
+<nav class="link-tabs" aria-label="Filtro de notificaciones">
+  @for (view of views; track view.id) {
+    <a
+      class="link-tab"
+      [routerLink]="[]"
+      [queryParams]="tabParams(view.id)"
+      [class.is-active]="state().view === view.id"
+      [attr.aria-current]="state().view === view.id ? 'page' : null"
+    >
+      {{ view.label }}
+      @if (view.id === 'no-leidas' && unread() > 0) {
+        <span class="link-tab__count num">{{ unread() }}</span>
+      }
+    </a>
+  }
+</nav>
+
+<p class="sr-only" aria-live="polite">{{ announcement() }}</p>
+
+@if (error(); as failure) {
+  <app-error-state [error]="failure" title="No pudimos cargar las notificaciones" (retry)="reload()" />
+} @else if (page(); as data) {
+  @if (data.content.length === 0) {
+    @if (state().page > 0) {
+      <app-empty-state
+        icon="bell"
+        title="No hay notificaciones en esta página"
+        description="Puede que ya las hayas marcado como leídas."
+      >
+        <button appButton type="button" (click)="firstPage()">Volver a la primera página</button>
+      </app-empty-state>
+    } @else if (state().view === 'no-leidas') {
+      <app-empty-state icon="bell" title="No tienes notificaciones sin leer" description="Estás al día." />
+    } @else {
+      <app-empty-state
+        icon="bell"
+        title="Aún no tienes notificaciones"
+        description="Te avisaremos cuando algo cambie en tus tickets o en tus equipos."
+      />
+    }
+  } @else {
+    <ul class="items" [class.is-stale]="loading()" [attr.aria-busy]="loading() ? 'true' : null">
+      @for (notification of data.content; track notification.id) {
+        <li class="item" [class.is-unread]="isUnread(notification)">
+          <span class="item__icon" aria-hidden="true"><app-icon [name]="iconFor(notification)" [size]="18" /></span>
+
+          <div class="item__body">
+            @if (linkFor(notification); as link) {
+              <a class="item__message" [routerLink]="link" (click)="open(notification)">{{ notification.message }}</a>
+            } @else {
+              <p class="item__message">{{ notification.message }}</p>
+            }
+            <p class="item__meta">
+              @if (isUnread(notification)) {
+                <span class="unread-label">No leída</span> ·
+              }
+              <app-time [value]="notification.createdAt" />
+            </p>
+          </div>
+
+          @if (isUnread(notification)) {
+            <button
+              appButton
+              size="sm"
+              variant="ghost"
+              type="button"
+              [attr.aria-label]="'Marcar como leída: ' + notification.message"
+              (click)="markOne(notification)"
+            >
+              Marcar como leída
+            </button>
+          }
+        </li>
+      }
+    </ul>
+
+    <app-pagination
+      class="list-pager"
+      [page]="state().page"
+      [size]="state().size"
+      [totalElements]="data.totalElements"
+      [sizeOptions]="sizeOptions"
+      (pageChange)="onPage($event)"
+      (sizeChange)="onSize($event)"
+    />
+  }
+} @else {
+  <div class="list-loading" role="status" aria-label="Cargando notificaciones">
+    @for (row of [1, 2, 3, 4, 5]; track row) {
+      <app-skeleton height="1rem" />
+    }
+  </div>
+}

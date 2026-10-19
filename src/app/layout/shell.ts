@@ -13,7 +13,7 @@ import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } fro
 import { UserMenu } from './user-menu';
 import { Button, Icon } from '@shared/ui';
 import { AuthService } from '@core/auth/auth.service';
-import { UnreadNotifications } from '@core/notification/unread-notifications.service';
+import { UnreadNotifications } from '@core/notifications/unread-notifications.service';
 import { navGroupsFor, pathOf } from './nav-items';
 import { filter } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -22,7 +22,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
   selector: 'app-shell',
   imports: [RouterOutlet, RouterLink, RouterLinkActive, Button, Icon, UserMenu],
   templateUrl: './shell.html',
-  styleUrl: './shell.scss', 
+  styleUrl: './shell.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { '(document:keydown.escape)': 'closeNav()' },
 })

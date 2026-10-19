@@ -4,9 +4,6 @@ import { ACCESS } from '@core/auth/access';
 import { authGuard, guestGuard, roleGuard } from '@core/auth/guards';
 import { unsavedChangesGuard } from '@core/auth/unsaved-changes.guard';
 
-const placeholder = () =>
-  import('./features/placeholder/placeholder-page').then((m) => m.PlaceholderPage);
-
 const designRoutes: Routes = [
   {
     path: 'design/tokens',
@@ -109,8 +106,8 @@ export const routes: Routes = [
       {
         path: 'notificaciones',
         title: 'Notificaciones',
-        loadComponent: placeholder,
-        data: { heading: 'Notificaciones' },
+        loadComponent: () =>
+          import('./features/notifications/notifications-page').then((m) => m.NotificationsPage),
       },
 
       {

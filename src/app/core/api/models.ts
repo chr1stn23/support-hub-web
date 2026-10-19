@@ -367,3 +367,26 @@ export interface DashboardReport extends DashboardSummary {
   recentActivity: ActivityItem[];
   generatedAt: string;
 }
+
+// Notificaciones
+export type NotificationType =
+  | 'TICKET_CREATED'
+  | 'TICKET_ASSIGNED'
+  | 'TICKET_STATUS_CHANGED'
+  | 'TICKET_COMMENT_ADDED'
+  | 'ASSET_ASSIGNED'
+  | 'ASSET_TRANSFERRED'
+  | 'ASSET_RETURNED';
+
+export interface AppNotification {
+  id: string;
+  /** Un texto, no el tipo cerrado: si el backend añade tipos, la pantalla no debe fallar. */
+  type: NotificationType | string;
+  /** Ya viene en español. */
+  message: string;
+  ticketId: string | null;
+  assetId: string | null;
+  read: boolean;
+  readAt: string | null;
+  createdAt: string;
+}
