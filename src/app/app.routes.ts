@@ -39,8 +39,8 @@ export const routes: Routes = [
       {
         path: 'resumen',
         title: 'Resumen',
-        loadComponent: placeholder,
-        data: { heading: 'Resumen', description: 'El estado de la operación de un vistazo.' },
+        loadComponent: () =>
+          import('./features/dashboard/dashboard-page').then((m) => m.DashboardPage),
       },
       {
         path: 'tickets',

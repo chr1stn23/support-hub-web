@@ -322,3 +322,48 @@ export interface AuditLogEntry {
   metadata: Record<string, unknown> | null;
   createdAt: string;
 }
+
+// Resumen completo
+
+export interface DashboardPeriod {
+  from: string;
+  to: string;
+  days: number;
+}
+
+export interface DayPoint {
+  day: string;
+  created: number;
+  resolved: number;
+}
+
+export interface CategoryCount {
+  category: string;
+  count: number;
+}
+
+export interface ActivityItem {
+  at: string;
+  eventType: string;
+  actor: UserSummary | null;
+  ticketId: string;
+  ticketCode: string;
+  ticketTitle: string;
+  oldValue: string | null;
+  newValue: string | null;
+  note: string | null;
+}
+
+export interface DashboardReport extends DashboardSummary {
+  period: DashboardPeriod;
+  tickets: DashboardSummary['tickets'] & {
+    createdInPeriod: number;
+    resolvedInPeriod: number;
+    /** null si todavía no hay tickets resueltos. */
+    avgResolutionHours: number | null;
+    byCategory: CategoryCount[];
+    trend: DayPoint[];
+  };
+  recentActivity: ActivityItem[];
+  generatedAt: string;
+}

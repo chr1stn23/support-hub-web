@@ -1,0 +1,226 @@
+<app-page-header title="Resumen" [description]="description()">
+  <label class="period">
+    <span>Período</span>
+    <select class="control" (change)="setDays($event)">
+      @for (option of periodOptions; track option.days) {
+        <option [value]="option.days" [selected]="option.days === days()">{{ option.label }}</option>
+      }
+    </select>
+  </label>
+  <button appButton type="button" (click)="refresh()">Actualizar</button>
+</app-page-header>
+
+@if (error(); as failure) {
+  <app-error-state [error]="failure" title="No pudimos cargar el resumen" (retry)="refresh()" />
+} @else if (data(); as d) {
+  <div class="dash" [class.is-stale]="loading()" [attr.aria-busy]="loading() ? 'true' : null">
+    <ul class="stats" aria-label="Cifras principales">
+      @for (card of cards(); track card.id) {
+        <li>
+          @if (card.link; as link) {
+            <a class="stat" [class.is-attention]="card.attention" routerLink="/tickets" [queryParams]="link.params">
+              <span class="stat__label">{{ card.label }}</span>
+              <span class="stat__value num">{{ card.value }}</span>
+              @if (card.hint) {
+                <span class="stat__hint">{{ card.hint }}</span>
+              }
+            </a>
+          } @else {
+            <div class="stat">
+              <span class="stat__label">{{ card.label }}</span>
+              <span class="stat__value num">{{ card.value }}</span>
+              @if (card.hint) {
+                <span class="stat__hint">{{ card.hint }}</span>
+              }
+            </div>
+          }
+        </li>
+      }
+    </ul>
+
+    <div class="split split--wide">
+      <section class="card" aria-labelledby="trend-title">
+        <h2 id="trend-title">Tickets creados y resueltos</h2>
+        <p class="muted">Últimos {{ d.period.days }} días. Los días se cuentan en UTC.</p>
+
+        @if (chart(); as c) {
+          @if (c.empty) {
+            <p class="muted empty">Sin movimiento en este período.</p>
+          } @else {
+            <ul class="legend">
+              <li>
+                <span class="swatch swatch--created" aria-hidden="true"></span>
+                Creados <span class="num">({{ format(c.totalCreated) }})</span>
+              </li>
+              <li>
+                <span class="swatch swatch--resolved" aria-hidden="true"></span>
+                Resueltos <span class="num">({{ format(c.totalResolved) }})</span>
+              </li>
+            </ul>
+
+            <svg class="chart" [attr.viewBox]="'0 0 ' + c.width + ' ' + c.height" role="img"
+                 [attr.aria-label]="chartLabel()">
+              @for (tick of c.yTicks; track tick.value) {
+                <line class="grid" [attr.x1]="c.plot.left" [attr.x2]="c.plot.right" [attr.y1]="tick.y"
+                      [attr.y2]="tick.y" />
+                <text class="tick" text-anchor="end" dominant-baseline="middle" [attr.x]="c.plot.left - 6"
+                      [attr.y]="tick.y">
+                  {{ tick.value }}
+                </text>
+              }
+              @for (tick of c.xTicks; track tick.x) {
+                <text class="tick" text-anchor="middle" [attr.x]="tick.x" [attr.y]="c.height - 8">{{ tick.label }}
+                </text>
+              }
+              <polyline class="line line--created" fill="none" [attr.points]="c.created" />
+              <polyline class="line line--resolved" fill="none" [attr.points]="c.resolved" />
+            </svg>
+
+            <details class="data">
+              <summary>Ver los datos por día</summary>
+              <div class="data__scroll">
+                <table class="table">
+                  <caption class="sr-only">
+                    Tickets creados y resueltos por día
+                  </caption>
+                  <thead>
+                  <tr>
+                    <th>Día</th>
+                    <th class="cell-num">Creados</th>
+                    <th class="cell-num">Resueltos</th>
+                  </tr>
+                  </thead>
+                  <tbody>
+                    @for (point of d.tickets.trend; track point.day) {
+                      <tr>
+                        <td>{{ point.day }}</td>
+                        {{ ' ' }}
+                        <td class="cell-num">{{ point.created }}</td>
+                        {{ ' ' }}
+                        <td class="cell-num">{{ point.resolved }}</td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            </details>
+          }
+        }
+      </section>
+
+      <section class="card" aria-labelledby="status-title">
+        <h2 id="status-title">Tickets por estado</h2>
+        <ul class="bars">
+          @for (row of statusRows(); track row.status) {
+            <li class="bar-row">
+              <app-ticket-status [status]="row.status" />
+              <span class="bar" aria-hidden="true"><span [style.width.%]="row.percent"></span></span>
+              <span class="num">{{ format(row.count) }}</span>
+            </li>
+          }
+        </ul>
+      </section>
+    </div>
+
+    <div class="split">
+      <section class="card" aria-labelledby="category-title">
+        <h2 id="category-title">Por categoría</h2>
+        <p class="muted">Tickets creados en los últimos {{ d.period.days }} días.</p>
+        @if (categoryRows().length === 0) {
+          <p class="muted empty">Sin tickets creados en este período.</p>
+        } @else {
+          <ul class="bars">
+            @for (row of categoryRows(); track row.category) {
+              <li class="bar-row bar-row--text">
+                <span class="label">{{ row.category }}</span>{{ ' ' }}
+                <span class="bar" aria-hidden="true"><span [style.width.%]="row.percent"></span></span>
+                <span class="num">{{ format(row.count) }}</span>
+              </li>
+            }
+          </ul>
+        }
+      </section>
+
+      @if (assets(); as inventory) {
+        <section class="card" aria-labelledby="assets-title">
+          <h2 id="assets-title">
+            Equipos
+            <a class="more" routerLink="/activos">Ver inventario ({{ format(inventory.total) }})</a>
+          </h2>
+          <ul class="bars">
+            @for (row of assetRows(); track row.status) {
+              <li>
+                <a class="bar-row" routerLink="/activos" [queryParams]="{ estado: row.view }">
+                  <app-asset-status [status]="row.status" />
+                  <span class="bar" aria-hidden="true"><span [style.width.%]="row.percent"></span></span>
+                  <span class="num">{{ format(row.count) }}</span>
+                </a>
+              </li>
+            }
+          </ul>
+          @if (typeRows().length > 0) {
+            <h3 class="subtitle">Por tipo</h3>
+            <ul class="bars">
+              @for (row of typeRows(); track row.type) {
+                <li class="bar-row bar-row--text">
+                  <span class="label">{{ row.type }}</span> {{ ' ' }}
+                  <span class="bar" aria-hidden="true"><span [style.width.%]="row.percent"></span></span>
+                  <span class="num">{{ format(row.count) }}</span>
+                </li>
+              }
+            </ul>
+          }
+        </section>
+      }
+    </div>
+
+    <section class="card" aria-labelledby="activity-title">
+      <h2 id="activity-title">Actividad reciente</h2>
+      @if (activity().length === 0) {
+        <p class="muted empty">Sin actividad reciente.</p>
+      } @else {
+        <ul class="activity">
+          @for (row of activity(); track $index) {
+            <li class="activity__item">
+              <p class="activity__summary">{{ row.text.summary }}</p>
+              @if (row.text.detail) {
+                <p class="muted small">{{ row.text.detail }}</p>
+              }
+              @if (row.text.note) {
+                <p class="note">“{{ row.text.note }}”</p>
+              }
+              <p class="small">
+                <a [routerLink]="['/tickets', row.item.ticketId]">
+                  <span class="mono">{{ row.item.ticketCode }}</span> · {{ row.item.ticketTitle }}
+                </a>
+                <span class="muted"> · <app-time [value]="row.item.at" /></span>
+              </p>
+            </li>
+          }
+        </ul>
+      }
+    </section>
+
+    <p class="muted small updated">Actualizado
+      <app-time [value]="d.generatedAt" />
+    </p>
+  </div>
+} @else {
+  <div class="dash" role="status" aria-label="Cargando el resumen">
+    <ul class="stats">
+      @for (placeholder of [1, 2, 3, 4]; track placeholder) {
+        <li class="stat">
+          <app-skeleton [lines]="2" />
+        </li>
+      }
+    </ul>
+    <div class="split split--wide">
+      <div class="card">
+        <app-skeleton [lines]="6" />
+      </div>
+      <div class="card">
+        <app-skeleton [lines]="6" />
+      </div>
+    </div>
+  </div>
+}
