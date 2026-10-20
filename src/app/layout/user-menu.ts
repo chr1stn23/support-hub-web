@@ -15,10 +15,9 @@ import { Icon } from '@shared/ui';
       type="button"
       class="trigger"
       [cdkMenuTriggerFor]="menu"
-      [attr.aria-label]="'Menú de ' + name()"
       [attr.title]="allRoles()"
     >
-      <app-avatar [name]="name()" />
+      <app-avatar [name]="name()" aria-hidden="true" />
       <span class="who">
         <span class="who__name">{{ name() }}</span>
         <span class="who__role">{{ roleLabel() }}</span>

@@ -56,9 +56,13 @@ describe('UserMenu', () => {
     expect(trigger.getAttribute('title')).toBe('Agente · Usuario');
   });
 
-  it('names the trigger for screen readers', () => {
+  it('names the trigger from visible text without overriding aria-label', () => {
     const { el } = setup();
-    expect(el.querySelector('.trigger')?.getAttribute('aria-label')).toBe('Menú de Lucía Usuaria');
+    const trigger = el.querySelector<HTMLButtonElement>('.trigger');
+
+    expect(trigger?.getAttribute('aria-label')).toBeNull();
+    expect(trigger?.textContent).toContain('Lucía Usuaria');
+    expect(trigger?.textContent).toContain('Usuario');
   });
 
   it('opens a menu with "Cerrar sesión" and signs out', async () => {

@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { API_BASE } from '@core/api/api-config';
 import { SessionNotice } from '@core/api/error-messages';
 import { LoginResponse, Role, UserResponse } from '@core/api/models';
-import { firstValueFrom, map, Observable, tap } from 'rxjs';
+import { catchError, EMPTY, finalize, firstValueFrom, map, Observable, tap } from 'rxjs';
 import { SKIP_SESSION_EXPIRY } from './http-context';
 import { toApiError } from '@core/api/api-error';
 
@@ -92,12 +92,16 @@ export class AuthService {
   }
 
   logout(): void {
-    // Revoca el refresh token en el servidor; aunque falle, esta pestaña queda sin sesión
     this.http
       .post<void>(`${API_BASE}/auth/logout`, null, { context: skipSessionExpiry() })
-      .subscribe({ error: () => undefined });
-    this.endSession();
-    void this.router.navigate(['/login']);
+      .pipe(
+        catchError(() => EMPTY),
+        finalize(() => {
+          this.endSession();
+          void this.router.navigate(['/login']);
+        }),
+      )
+      .subscribe();
   }
 
   /** La renovación falló: la sesión murió con la aplicación en marcha. */

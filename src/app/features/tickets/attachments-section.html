@@ -30,7 +30,8 @@
         {{ limitsHint }}
       }
     </p>
-    <input #picker class="sr-only" type="file" multiple tabindex="-1" [accept]="accept" (change)="onPick($event)" />
+    <input #picker class="sr-only" type="file" multiple tabindex="-1" [accept]="accept" (change)="onPick($event)"
+           aria-label="Adjuntar archivos al ticket" />
   </div>
 } @else {
   <p class="notice">
