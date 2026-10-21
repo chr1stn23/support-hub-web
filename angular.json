@@ -84,7 +84,22 @@
           "defaultConfiguration": "development"
         },
         "test": {
-          "builder": "@angular/build:unit-test"
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "coverageInclude": ["src/app/**/*.ts"],
+            "coverageExclude": [
+              "src/app/**/*.spec.ts",
+              "src/app/**/*-fixtures.ts",
+              "src/app/features/design/**"
+            ],
+            "coverageReporters": ["text-summary", "html", "lcov"],
+            "coverageThresholds": {
+              "statements": 95,
+              "branches": 91,
+              "functions": 93,
+              "lines": 96
+            }
+          }
         },
         "lint": {
           "builder": "@angular-eslint/builder:lint",

@@ -47,6 +47,8 @@ test('un ticket recorre su ciclo entre dos personas: se crea, se toma, se coment
     await expect(
       user.page.getByRole('link', { name: /Notificaciones, \d+ sin leer/ }),
     ).toBeVisible();
+    expect(user.errors, 'errores en la ventana de la persona usuaria').toEqual([]);
+    expect(agent.errors, 'errores en la ventana del agente').toEqual([]);
   } finally {
     await user.context.close();
     await agent.context.close();

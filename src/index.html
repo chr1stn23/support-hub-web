@@ -1,14 +1,27 @@
 <!doctype html>
 <html lang="es">
-  <head>
-    <meta charset="utf-8" />
-    <title>SupportHub</title>
-    <base href="/" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="color-scheme" content="light" />
-    <link rel="icon" type="image/x-icon" href="favicon.ico" />
-  </head>
-  <body>
-    <app-root></app-root>
-  </body>
+<head>
+  <meta charset="utf-8" />
+  <title>SupportHub</title>
+  <base href="/" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="light" />
+  <link rel="icon" type="image/x-icon" href="favicon.ico" />
+  <style>
+    .boot {
+      display: grid;
+      place-items: center;
+      min-height: 100vh;
+      font-family: system-ui, sans-serif;
+      font-size: 1rem;
+      color: #475569;
+    }
+  </style>
+</head>
+<body>
+<app-root>
+  <div class="boot" role="status">Cargando SupportHub...</div>
+</app-root>
+<noscript>SupportHub necesita JavaScript para funcionar.</noscript>
+</body>
 </html>

@@ -9,7 +9,10 @@
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "playwright test",
-    "e2e:report": "playwright show-report"
+    "e2e:report": "playwright show-report",
+    "test:coverage": "ng test --watch=false --coverage",
+    "analyze": "ng build --stats-json",
+    "unused": "knip --production"
   },
   "private": true,
   "packageManager": "npm@12.2.0",
@@ -34,9 +37,11 @@
     "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.64.1",
     "@types/node": "^26.6.5",
+    "@vitest/coverage-v8": "^5.0.5",
     "angular-eslint": "22.5.0",
     "eslint": "^10.9.1",
     "jsdom": "^30.0.0",
+    "knip": "^6.42.1",
     "prettier": "^3.8.1",
     "typescript": "~6.0.2",
     "typescript-eslint": "8.69.0",

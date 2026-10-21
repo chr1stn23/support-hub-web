@@ -69,6 +69,8 @@ test('un equipo se registra, se asigna, lo ve su responsable, reporta un problem
     await status.getByRole('button', { name: 'Confirmar' }).click();
     await expect(manager.page.getByRole('button', { name: 'Cambiar estado' })).toHaveCount(0);
     await expect(manager.page.getByRole('button', { name: 'Editar' })).toHaveCount(0);
+    expect(manager.errors, 'errores en la ventana del gestor').toEqual([]);
+    expect(user.errors, 'errores en la ventana de la persona usuaria').toEqual([]);
   } finally {
     await manager.context.close();
     await user.context.close();

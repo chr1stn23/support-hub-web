@@ -1,0 +1,14 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "entry": ["src/main.ts"],
+  "project": ["src/**/*.ts"],
+  "ignore": ["src/**/*.spec.ts", "src/**/*-fixtures.ts", "e2e/**"],
+  "ignoreDependencies": [
+    "@fontsource/ibm-plex-sans",
+    "@fontsource/ibm-plex-mono",
+    "@angular/cdk",
+    "@angular/forms",
+    "@angular/router"
+  ],
+  "ignoreBinaries": ["ng"]
+}
