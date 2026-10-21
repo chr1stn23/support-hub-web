@@ -130,7 +130,7 @@ describe('TicketListPage', () => {
     await setup(['AGENT']);
     await loadWith(pageOf([ticket()]));
 
-    const tabs = Array.from(el().querySelectorAll('.view')).map((a) =>
+    const tabs = Array.from(el().querySelectorAll('.link-tab')).map((a) =>
       (a.textContent ?? '').replace(/\s+/g, ' ').trim(),
     );
     expect(tabs).toEqual([
@@ -141,7 +141,7 @@ describe('TicketListPage', () => {
       'Resueltos 5',
       'Todos 29',
     ]);
-    expect(el().querySelector('.view.is-active')?.getAttribute('aria-current')).toBe('page');
+    expect(el().querySelector('.link-tab.is-active')?.getAttribute('aria-current')).toBe('page');
   });
 
   it('hides the agent view and the requester column from an ordinary user', async () => {

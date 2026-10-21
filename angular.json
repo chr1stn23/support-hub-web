@@ -4,9 +4,7 @@
   "cli": {
     "packageManager": "npm",
     "analytics": "eb362ffb-2a26-4843-9caf-f7f2e2582f3d",
-    "schematicCollections": [
-      "angular-eslint"
-    ]
+    "schematicCollections": ["angular-eslint"]
   },
   "newProjectRoot": "projects",
   "projects": {
@@ -46,8 +44,13 @@
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "500kB",
-                  "maximumError": "1MB"
+                  "maximumWarning": "460kB",
+                  "maximumError": "530kB"
+                },
+                {
+                  "type": "anyScript",
+                  "maximumWarning": "215kB",
+                  "maximumError": "265kB"
                 },
                 {
                   "type": "anyComponentStyle",
@@ -86,10 +89,7 @@
         "lint": {
           "builder": "@angular-eslint/builder:lint",
           "options": {
-            "lintFilePatterns": [
-              "src/**/*.ts",
-              "src/**/*.html"
-            ]
+            "lintFilePatterns": ["src/**/*.ts", "src/**/*.html"]
           }
         }
       }

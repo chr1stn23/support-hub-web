@@ -5,11 +5,11 @@
   </a>
 </app-page-header>
 
-<nav class="views" aria-label="Vistas de tickets">
+<nav class="link-tabs" aria-label="Vistas de tickets">
   @for (view of views(); track view.id) {
     @let count = countOf(view.id);
     <a
-      class="view"
+      class="link-tab"
       [routerLink]="[]"
       [queryParams]="tabParams(view.id)"
       [class.is-active]="state().view === view.id"
@@ -17,14 +17,14 @@
     >
       {{ view.label }}
       @if (count !== null) {
-        <span class="view__count num">{{ count }}</span>
+        <span class="link-tab__count num">{{ count }}</span>
       }
     </a>
   }
 </nav>
 
-<div class="filters" role="search">
-  <div class="search">
+<div class="list-filters" role="search">
+  <div class="list-search">
     <app-icon name="search" [size]="16" />
     <input
       class="control"
@@ -166,7 +166,7 @@
     </div>
 
     <app-pagination
-      class="pager"
+      class="list-pager"
       [page]="state().page"
       [size]="state().size"
       [totalElements]="data.totalElements"
@@ -176,11 +176,9 @@
     />
   }
 } @else {
-  <div class="table-wrap loading" role="status" aria-label="Cargando tickets">
-    <div class="loading__rows">
-      @for (row of [1, 2, 3, 4, 5, 6]; track row) {
-        <app-skeleton height="1rem" />
-      }
-    </div>
+  <div class="table-wrap list-loading" role="status" aria-label="Cargando tickets">
+    @for (row of [1, 2, 3, 4, 5, 6]; track row) {
+      <app-skeleton height="1rem" />
+    }
   </div>
 }

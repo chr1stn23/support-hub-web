@@ -25,8 +25,8 @@
   }
 </nav>
 
-<div class="filters" role="search">
-  <div class="search">
+<div class="list-filters" role="search">
+  <div class="list-search">
     <app-icon name="search" [size]="16" />
     <input
       class="control"
@@ -122,7 +122,7 @@
     </div>
 
     <app-pagination
-      class="pager"
+      class="list-pager"
       [page]="state().page"
       [size]="state().size"
       [totalElements]="data.totalElements"
@@ -132,11 +132,9 @@
     />
   }
 } @else {
-  <div class="table-wrap loading" role="status" aria-label="Cargando equipos">
-    <div class="loading__rows">
-      @for (row of [1, 2, 3, 4, 5, 6]; track row) {
-        <app-skeleton height="1rem" />
-      }
-    </div>
+  <div class="table-wrap list-loading" role="status" aria-label="Cargando equipos">
+    @for (row of [1, 2, 3, 4, 5, 6]; track row) {
+      <app-skeleton height="1rem" />
+    }
   </div>
 }
