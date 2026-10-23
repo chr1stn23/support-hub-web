@@ -40,7 +40,7 @@
     "@types/node": "^26.6.5",
     "@vitest/coverage-v8": "^5.0.5",
     "angular-eslint": "22.5.0",
-    "eslint": "^10.9.1",
+    "eslint": "^10.13.0",
     "jsdom": "^30.0.0",
     "knip": "^6.42.1",
     "prettier": "^3.8.1",
