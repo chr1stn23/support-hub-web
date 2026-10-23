@@ -1,0 +1,164 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '22'
+  BACKEND_REPOSITORY: chr1stn23/support-hub-backend
+
+jobs:
+  quality:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - run: npm ci
+
+      - name: Lint (con las reglas de accesibilidad de las plantillas)
+        run: npx ng lint
+
+      - name: Pruebas unitarias y cobertura (los umbrales hacen fallar el trabajo)
+        run: npx ng test --watch=false --coverage
+
+      - name: Compilar (los presupuestos de tamaño hacen fallar el trabajo)
+        run: npx ng build
+
+      - name: La página principal no lleva código en línea (compatible con la política de contenido)
+        run: |
+          if grep -q 'onload=' dist/*/browser/index.html; then
+            echo "index.html tiene un atributo onload en línea: revisa optimization.styles.inlineCritical en angular.json"
+            exit 1
+          fi
+
+      - name: Código y dependencias sin usar
+        run: npx knip --production
+
+      - name: Dependencias vulnerables
+        run: npm audit --omit=dev --audit-level=high
+
+      - name: Informe de cobertura
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: coverage
+          path: coverage
+          if-no-files-found: ignore
+
+  e2e:
+    runs-on: ubuntu-24.04
+    needs: quality
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Backend
+        uses: actions/checkout@v5
+        with:
+          repository: ${{ env.BACKEND_REPOSITORY }}
+          path: backend
+
+      - name: Variables del compose
+        run: |
+          {
+            echo "BACKEND_DIR=./backend"
+            echo "POSTGRES_PASSWORD=ci-postgres"
+            echo "JWT_SECRET=$(openssl rand -base64 48)"
+            echo "HTTP_PORT=8081"
+            echo "PUBLIC_ORIGIN=http://localhost:8081"
+          } > .env
+
+      - name: Levantar la aplicación (perfil local con cuentas de demostración)
+        run: docker compose -f docker-compose.yaml -f docker-compose.e2e.yaml up -d --build
+
+      - name: Esperar a que el backend responda a través de nginx
+        run: |
+          for i in $(seq 1 60); do
+            code=$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8081/api/v1/auth/me || true)
+            if [ "$code" = "401" ]; then echo "listo"; exit 0; fi
+            sleep 3
+          done
+          echo "El backend no respondió a tiempo"
+          docker compose logs --no-color backend | tail -n 80
+          exit 1
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+
+      - name: Pruebas de extremo a extremo
+        run: npm run e2e
+        env:
+          CI: 'true'
+          E2E_BASE_URL: http://localhost:8081
+          E2E_DEPLOYED: '1'
+
+      - name: Informes y registros
+        if: failure()
+        run: docker compose logs --no-color > compose.log
+
+      - name: Subir informes
+        if: failure()
+        uses: actions/upload-artifact@v5
+        with:
+          name: e2e-report
+          path: |
+            playwright-report
+            test-results
+            compose.log
+          if-no-files-found: ignore
+
+      - name: Apagar
+        if: always()
+        run: docker compose -f docker-compose.yaml -f docker-compose.e2e.yaml down -v
+
+  image:
+    runs-on: ubuntu-24.04
+    needs: quality
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Nombre de la imagen (en minúsculas, como exige el registro)
+        run: echo "IMAGE=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_ENV"
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Iniciar sesión en el registro (solo en main)
+        if: github.ref == 'refs/heads/main'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Compilar la imagen (y publicarla en main)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: ${{ github.ref == 'refs/heads/main' }}
+          tags: |
+            ${{ env.IMAGE }}:${{ github.sha }}
+            ${{ env.IMAGE }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

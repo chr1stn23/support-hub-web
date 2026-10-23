@@ -1,0 +1,54 @@
+name: support-hub
+
+services:
+  postgres:
+    image: postgres:18-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: supporthub
+      POSTGRES_USER: supporthub
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Define POSTGRES_PASSWORD en .env}
+    volumes:
+      - pgdata:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U supporthub -d supporthub"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  backend:
+    build:
+      context: ${BACKEND_DIR:?Define BACKEND_DIR en .env con la carpeta del backend}
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      DATABASE_URL: jdbc:postgresql://postgres:5432/supporthub
+      DATABASE_USERNAME: supporthub
+      DATABASE_PASSWORD: ${POSTGRES_PASSWORD}
+      # Sin valor por defecto: si falta o es corto, la aplicación se niega a arrancar
+      JWT_SECRET: ${JWT_SECRET:?Genera uno de 32+ caracteres con openssl rand -base64 48}
+      CORS_ALLOWED_ORIGINS: ${PUBLIC_ORIGIN:-http://localhost:8081}
+      COOKIE_SECURE: ${COOKIE_SECURE:-true}
+      FILE_STORAGE_PATH: /data/attachments
+      BOOTSTRAP_ADMIN_EMAIL: ${BOOTSTRAP_ADMIN_EMAIL:-}
+      BOOTSTRAP_ADMIN_PASSWORD: ${BOOTSTRAP_ADMIN_PASSWORD:-}
+      BOOTSTRAP_ADMIN_NAME: ${BOOTSTRAP_ADMIN_NAME:-Administrador}
+    volumes:
+      - files:/data/attachments
+
+  frontend:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "${HTTP_PORT:-8081}:8080"
+    security_opt:
+      - no-new-privileges:true
+
+volumes:
+  pgdata:
+  files:

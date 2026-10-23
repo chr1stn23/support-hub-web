@@ -12,7 +12,8 @@
     "e2e:report": "playwright show-report",
     "test:coverage": "ng test --watch=false --coverage",
     "analyze": "ng build --stats-json",
-    "unused": "knip --production"
+    "unused": "knip --production",
+    "docker:build": "docker build -t supporthub-web ."
   },
   "private": true,
   "packageManager": "npm@12.2.0",

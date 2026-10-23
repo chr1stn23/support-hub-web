@@ -1,0 +1,7 @@
+# El perfil "local" crea las cuentas de demostración que usan las pruebas.
+# SOLO para desarrollo y CI: nunca lo combines con datos reales.
+services:
+  backend:
+    environment:
+      SPRING_PROFILES_ACTIVE: local
+      COOKIE_SECURE: "false"
